@@ -56,6 +56,9 @@ public interface IVolumeProvider
 public interface IPhysicalDiskProvider
 {
     Task<IReadOnlyList<PhysicalDiskInfo>> GetDisksAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Type of the physical disk behind each drive letter ("C" → SSD).</summary>
+    Task<IReadOnlyDictionary<string, DiskMedia>> GetVolumeMediaAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>Plain-language names for disk facts.</summary>
