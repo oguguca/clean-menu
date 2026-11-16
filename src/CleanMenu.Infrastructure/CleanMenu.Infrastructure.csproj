@@ -4,10 +4,17 @@
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <RootNamespace>CleanMenu.Infrastructure</RootNamespace>
+    <!-- Required by the LibraryImport source generator (Win32 calls in Native/). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CleanMenu.Core\CleanMenu.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="10.0.15" />
+    <PackageReference Include="System.Management" Version="10.0.15" />
   </ItemGroup>
 
 </Project>
