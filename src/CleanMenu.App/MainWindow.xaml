@@ -29,6 +29,15 @@
     <DataTemplate DataType="{x:Type vm:SmartCleanupViewModel}">
       <views:SmartCleanupView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+      <views:SettingsView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:HistoryViewModel}">
+      <views:HistoryView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:WindowsToolsViewModel}">
+      <views:WindowsToolsView />
+    </DataTemplate>
     <DataTemplate DataType="{x:Type vm:StartupViewModel}">
       <views:StartupView />
     </DataTemplate>

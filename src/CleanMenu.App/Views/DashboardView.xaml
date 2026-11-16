@@ -63,7 +63,7 @@
 
     <!-- ===== Live ===== -->
     <TextBlock Text="Agora" Style="{StaticResource Text.SectionTitle}" Margin="0,36,0,4" />
-    <TextBlock Text="Atualiza sozinho a cada 2 segundos." Style="{StaticResource Text.Caption}" Margin="0,0,0,14" />
+    <TextBlock Text="{Binding RefreshText}" Style="{StaticResource Text.Caption}" Margin="0,0,0,14" />
     <ItemsControl ItemsSource="{Binding LiveCards}" Focusable="False">
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>

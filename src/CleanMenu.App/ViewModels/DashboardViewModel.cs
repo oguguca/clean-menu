@@ -108,6 +108,8 @@ public sealed partial class DashboardViewModel : PageViewModel
 
     public string MachineName { get; }
 
+    public string RefreshText => $"Atualiza sozinho a cada {(int)_monitor.Interval.TotalSeconds} segundo(s)."; 
+
     public MetricCardViewModel HealthCard { get; }
 
     public MetricCardViewModel FreeableCard { get; }

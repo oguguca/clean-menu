@@ -60,7 +60,7 @@ public sealed partial class SmartCleanupViewModel : PageViewModel, IDisposable
 
         foreach (var category in _session.Categories)
         {
-            var row = new CleanupCategoryRowViewModel(category);
+            var row = new CleanupCategoryRowViewModel(category) { IsSelected = _session.IsSelectedByDefault(category) };
             row.PropertyChanged += OnRowChanged;
             Rows.Add(row);
         }
@@ -101,7 +101,7 @@ public sealed partial class SmartCleanupViewModel : PageViewModel, IDisposable
         }
 
         var dryRun = IsDryRun;
-        if (!dryRun && !_dialogs.Confirm(BuildConfirmation(selected)))
+        if (!dryRun && _session.ConfirmBeforeCleaning && !_dialogs.Confirm(BuildConfirmation(selected)))
         {
             return;
         }

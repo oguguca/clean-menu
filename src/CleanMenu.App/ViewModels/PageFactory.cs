@@ -18,6 +18,9 @@ public sealed class PageFactory(IServiceProvider services) : IPageFactory
         AppPage.Processes => services.GetRequiredService<ProcessesViewModel>(),
         AppPage.SystemInfo => services.GetRequiredService<SystemInfoViewModel>(),
         AppPage.Disks => services.GetRequiredService<DisksViewModel>(),
+        AppPage.History => services.GetRequiredService<HistoryViewModel>(),
+        AppPage.WindowsTools => services.GetRequiredService<WindowsToolsViewModel>(),
+        AppPage.Settings => services.GetRequiredService<SettingsViewModel>(),
         _ => new SectionPlaceholderViewModel(PageCatalog.Get(page)),
     };
 }

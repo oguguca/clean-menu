@@ -28,7 +28,7 @@ public sealed partial class LiveMonitorService(
 
     public event EventHandler<LiveSample>? SampleTaken;
 
-    public TimeSpan Interval { get; } = TimeSpan.FromSeconds(2);
+    public TimeSpan Interval { get; init; } = TimeSpan.FromSeconds(2);
 
     public LiveSample? Latest => _latest;
 

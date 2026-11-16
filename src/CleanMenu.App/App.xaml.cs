@@ -13,11 +13,14 @@ using CleanMenu.Infrastructure.Startup;
 using CleanMenu.Core.Monitoring;
 using CleanMenu.Core.Platform;
 using CleanMenu.Core.Processes;
+using CleanMenu.Core.Settings;
 using CleanMenu.Core.SystemInfo;
 using CleanMenu.Infrastructure.Disks;
 using CleanMenu.Infrastructure.Monitoring;
 using CleanMenu.Infrastructure.Platform;
 using CleanMenu.Infrastructure.Processes;
+using CleanMenu.Infrastructure.Settings;
+using CleanMenu.UI.Theming;
 using CleanMenu.Infrastructure.SystemInfo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -41,10 +44,16 @@ public partial class App : Application
         services.AddSingleton<IUiDispatcher, WpfUiDispatcher>();
         services.AddSingleton<ISystemActions, SystemActions>();
 
-        // Platform
+        // Settings (read once at startup; pages save changes)
+        services.AddSingleton<ISettingsStore, JsonSettingsStore>(_ => new JsonSettingsStore());
+        services.AddSingleton(sp => sp.GetRequiredService<ISettingsStore>().Load());
+        services.AddSingleton<IAutoStartService>(_ => new RegistryAutoStartService(Environment.ProcessPath ?? "CleanMenu.exe"));
+
+        // Platform: the user's choice in Settings wins over detection.
         services.AddSingleton<IOsVersionProvider, WindowsOsVersionProvider>();
-        // The user's own choice (Settings) is wired in Etapa 6; until then the detected version is used.
-        services.AddSingleton(sp => OsProfile.Detect(sp.GetRequiredService<IOsVersionProvider>()));
+        services.AddSingleton(sp => OsProfile.Detect(
+            sp.GetRequiredService<IOsVersionProvider>(),
+            sp.GetRequiredService<AppSettings>().SelectedWindows));
 
         // Monitoring (read-only)
         services.AddSingleton<IMemoryStatusProvider, WindowsMemoryStatusProvider>();
@@ -52,7 +61,16 @@ public partial class App : Application
         services.AddSingleton<IGpuUsageSampler, WindowsGpuUsageSampler>();
         services.AddSingleton<IProcessSource, WindowsProcessSource>();
         services.AddSingleton<ProcessMonitor>();
-        services.AddSingleton<LiveMonitorService>();
+        services.AddSingleton(sp => new LiveMonitorService(
+            sp.GetRequiredService<ICpuTimesProvider>(),
+            sp.GetRequiredService<IGpuUsageSampler>(),
+            sp.GetRequiredService<IMemoryStatusProvider>(),
+            sp.GetRequiredService<ProcessMonitor>(),
+            sp.GetRequiredService<TimeProvider>(),
+            sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<LiveMonitorService>>())
+        {
+            Interval = TimeSpan.FromSeconds(sp.GetRequiredService<AppSettings>().RefreshSeconds),
+        });
         services.AddSingleton<ILiveMonitor>(sp => sp.GetRequiredService<LiveMonitorService>());
         services.AddHostedService(sp => sp.GetRequiredService<LiveMonitorService>());
 
@@ -69,7 +87,19 @@ public partial class App : Application
         services.AddSingleton(_ => new PathSafetyValidator(WindowsProtectedFolders.Get()));
         services.AddSingleton<CleanupEngine>();
         services.AddSingleton<IOperationHistory, JsonOperationHistory>(_ => new JsonOperationHistory());
-        services.AddSingleton<CleanupSession>();
+        services.AddSingleton(sp =>
+        {
+            var settings = sp.GetRequiredService<AppSettings>();
+            return new CleanupSession(
+                sp.GetRequiredService<ICleanupCatalog>(),
+                sp.GetRequiredService<CleanupEngine>(),
+                sp.GetRequiredService<IOperationHistory>(),
+                sp.GetRequiredService<OsProfile>())
+            {
+                ConfirmBeforeCleaning = settings.ConfirmBeforeCleaning,
+                PreferredSelection = settings.DefaultCleanupCategories?.ToHashSet(StringComparer.Ordinal),
+            };
+        });
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<INavigationService, NavigationService>();
 
@@ -106,6 +136,15 @@ public partial class App : Application
         services.AddTransient<ProcessesViewModel>();
         services.AddTransient<SystemInfoViewModel>();
         services.AddTransient<DisksViewModel>();
+        services.AddTransient<HistoryViewModel>();
+        services.AddTransient<WindowsToolsViewModel>();
+        services.AddTransient(sp => new SettingsViewModel(
+            sp.GetRequiredService<ISettingsStore>(),
+            sp.GetRequiredService<IAutoStartService>(),
+            sp.GetRequiredService<ISystemActions>(),
+            sp.GetRequiredService<CleanupSession>(),
+            sp.GetRequiredService<OsProfile>(),
+            theme => ThemeManager.Apply(Current, theme == ThemePreference.Light ? AppTheme.Light : AppTheme.Dark)));
 
         // Shell
         services.AddSingleton<MainWindow>();
@@ -114,10 +153,22 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        var settings = _host.Services.GetRequiredService<AppSettings>();
+        if (settings.Theme == ThemePreference.Light)
+        {
+            ThemeManager.Apply(this, AppTheme.Light);
+        }
+
         await _host.StartAsync().ConfigureAwait(true);
 
         MainWindow = _host.Services.GetRequiredService<MainWindow>();
         MainWindow.Show();
+
+        if (settings.AnalyzeOnStartup && _host.Services.GetRequiredService<MainViewModel>().CurrentPage is DashboardViewModel dashboard)
+        {
+            dashboard.AnalyzeCommand.Execute(null);
+        }
     }
 
     protected override async void OnExit(ExitEventArgs e)

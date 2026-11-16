@@ -22,6 +22,23 @@ public sealed class CleanupSession(ICleanupCatalog catalog, CleanupEngine engine
 
     public bool IsBusy => _gate.CurrentCount == 0;
 
+    /// <summary>Category ids checked by default (from Settings); null = built-in defaults.</summary>
+    public IReadOnlySet<string>? PreferredSelection { get; set; }
+
+    /// <summary>Whether the cleanup page asks before deleting (Settings; on by default).</summary>
+    public bool ConfirmBeforeCleaning { get; set; } = true;
+
+    public bool IsSelectedByDefault(CleanupCategory category)
+    {
+        ArgumentNullException.ThrowIfNull(category);
+        if (category.RequiresAdmin)
+        {
+            return false;
+        }
+
+        return PreferredSelection?.Contains(category.Id) ?? category.SelectedByDefault;
+    }
+
     public void Dispose() => _gate.Dispose();
 
     /// <summary>Categories that exist on the Windows version the app is adapted to.</summary>
