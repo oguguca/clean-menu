@@ -1,0 +1,20 @@
+<UserControl x:Class="CleanMenu.UI.Controls.InfoTip"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="clr-namespace:CleanMenu.UI"
+             x:Name="Root"
+             Focusable="True"
+             Cursor="Help"
+             FocusVisualStyle="{StaticResource FocusVisual.Rounded}"
+             ToolTipService.InitialShowDelay="150"
+             ToolTipService.ShowDuration="60000"
+             ToolTipService.ShowsToolTipOnKeyboardFocus="True"
+             ToolTip="{Binding Text, ElementName=Root}"
+             AutomationProperties.Name="Ajuda"
+             AutomationProperties.HelpText="{Binding Text, ElementName=Root}">
+  <!-- Small "?" next to a label. Hover or focus it to read a plain explanation. -->
+  <Border Width="20" Height="20" CornerRadius="10" Background="Transparent">
+    <TextBlock Text="{x:Static ui:Glyphs.Help}" Style="{StaticResource Text.Icon}" FontSize="14"
+               HorizontalAlignment="Center" Foreground="{DynamicResource Brush.TextMuted}" />
+  </Border>
+</UserControl>

@@ -1,0 +1,33 @@
+<UserControl x:Class="CleanMenu.UI.Controls.StatCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:CleanMenu.UI.Controls"
+             x:Name="Root">
+  <!-- One metric: icon, name, "?" help, big value and a short plain caption. -->
+  <Border Style="{StaticResource Card}" MinHeight="148">
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <DockPanel>
+        <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource Brush.AccentSubtle}" DockPanel.Dock="Left">
+          <TextBlock Text="{Binding Glyph, ElementName=Root}" Style="{StaticResource Text.Icon}"
+                     HorizontalAlignment="Center" Foreground="{DynamicResource Brush.Accent}" />
+        </Border>
+        <controls:InfoTip Text="{Binding HelpText, ElementName=Root}" DockPanel.Dock="Right" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding Title, ElementName=Root}" Style="{StaticResource Text.CardTitle}"
+                   Margin="12,0,8,0" VerticalAlignment="Center" />
+      </DockPanel>
+
+      <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,16,0,4" VerticalAlignment="Bottom">
+        <Ellipse x:Name="StatusDot" Width="10" Height="10" Margin="0,0,10,0" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding Value, ElementName=Root}" Style="{StaticResource Text.Value}" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="2" Text="{Binding Caption, ElementName=Root}" Style="{StaticResource Text.Caption}" />
+    </Grid>
+  </Border>
+</UserControl>
