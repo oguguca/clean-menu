@@ -1,0 +1,15 @@
+<UserControl x:Class="CleanMenu.App.Views.SectionPlaceholderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:CleanMenu.UI.Controls;assembly=CleanMenu.UI"
+             xmlns:vm="clr-namespace:CleanMenu.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:SectionPlaceholderViewModel}"
+             Style="{StaticResource Page.Root}">
+  <StackPanel>
+    <controls:PageHeader Title="{Binding Title}" Description="{Binding Description}" />
+    <controls:ComingSoonPanel Margin="0,28,0,0" Features="{Binding PlannedFeatures}" Note="{Binding Note}" />
+  </StackPanel>
+</UserControl>

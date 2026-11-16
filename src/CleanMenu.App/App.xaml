@@ -2,5 +2,13 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              ShutdownMode="OnMainWindowClose">
-    <Application.Resources />
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <!-- Colors first: ThemeManager swaps this entry to change between dark and light. -->
+        <ResourceDictionary Source="pack://application:,,,/CleanMenu.UI;component/Themes/Colors.Dark.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/CleanMenu.UI;component/Themes/Theme.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
 </Application>

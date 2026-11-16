@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using CleanMenu.App.ViewModels;
 using CleanMenu.Core.Platform;
 using CleanMenu.Infrastructure.Platform;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,20 @@ public partial class App : Application
 
     private static void ConfigureServices(IServiceCollection services)
     {
+        // Platform
         services.AddSingleton<IOsVersionProvider, WindowsOsVersionProvider>();
+        // The user's own choice (Settings) is wired in Etapa 6; until then the detected version is used.
+        services.AddSingleton(sp => OsProfile.Detect(sp.GetRequiredService<IOsVersionProvider>()));
+
+        // Navigation and pages
+        services.AddSingleton<IPageFactory, PageFactory>();
+        services.AddSingleton<MainViewModel>();
+        services.AddTransient(sp => new DashboardViewModel(
+            sp.GetRequiredService<OsProfile>(),
+            Environment.MachineName,
+            sp.GetRequiredService<IOsVersionProvider>().GetOsVersion().Build));
+
+        // Shell
         services.AddSingleton<MainWindow>();
     }
 
