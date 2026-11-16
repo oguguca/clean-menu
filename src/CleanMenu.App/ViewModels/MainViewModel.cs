@@ -20,10 +20,14 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private PageViewModel? _currentPage;
 
-    public MainViewModel(IPageFactory pageFactory, OsProfile osProfile)
+    public MainViewModel(IPageFactory pageFactory, OsProfile osProfile, Services.INavigationService? navigation = null)
     {
         ArgumentNullException.ThrowIfNull(osProfile);
         _pageFactory = pageFactory ?? throw new ArgumentNullException(nameof(pageFactory));
+        if (navigation is not null)
+        {
+            navigation.NavigationRequested += (_, page) => NavigateTo(page);
+        }
 
         Items = PageCatalog.All.Select(info => new NavigationItem(info)).ToList();
         OsName = OsDisplay.Name(osProfile.Effective);

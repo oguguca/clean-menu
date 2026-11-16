@@ -11,6 +11,7 @@ public sealed class PageFactory(IServiceProvider services) : IPageFactory
     public PageViewModel Create(AppPage page) => page switch
     {
         AppPage.Dashboard => services.GetRequiredService<DashboardViewModel>(),
+        AppPage.SmartCleanup => services.GetRequiredService<SmartCleanupViewModel>(),
         AppPage.Memory => services.GetRequiredService<MemoryViewModel>(),
         AppPage.Processes => services.GetRequiredService<ProcessesViewModel>(),
         AppPage.SystemInfo => services.GetRequiredService<SystemInfoViewModel>(),

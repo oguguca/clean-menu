@@ -2,9 +2,12 @@
 
 Central de limpeza, manutenção, diagnóstico e otimização para Windows 10 e Windows 11.
 
-> **Status:** em desenvolvimento (v0.1.0). Funcionam: interface, detecção do Windows 10 / 11 e o
+> **Status:** em desenvolvimento (v0.1.0). Funcionam: interface, detecção do Windows 10 / 11,
 > monitoramento em tempo real (processador, memória, placa de vídeo, discos, processos e informações
-> do sistema). Limpeza e otimização ainda não estão disponíveis: essas seções mostram "em construção".
+> do sistema), análise do computador e Limpeza Inteligente (temporários, caches de navegadores,
+> miniaturas, relatórios de erro, Lixeira) com simulação, confirmação e histórico. Limpezas que exigem
+> administrador e as demais seções ainda mostram "em construção".
+> Regras de segurança da limpeza: [docs/cleanup-safety.md](docs/cleanup-safety.md).
 > O progresso real de cada módulo está na tabela [Roadmap](#roadmap).
 
 ---
@@ -110,7 +113,7 @@ O Clean Menu segue regras obrigatórias:
 | 1 | Arquitetura, estrutura, documentação, detecção Windows 10/11 | Concluída |
 | 2 | Interface: identidade visual, sidebar, dashboard, navegação | Concluída |
 | 3 | Monitoramento: sistema, CPU, RAM, discos, processos | Concluída |
-| 4 | Limpeza: motor de análise, temporários, caches, Lixeira, navegadores | Pendente |
+| 4 | Limpeza: motor de análise, temporários, caches, Lixeira, navegadores | Concluída |
 | 5 | Otimização: inicialização, processos, manutenção, HDD/SSD | Pendente |
 | 6 | Avançado: duplicados, arquivos grandes, histórico, configurações | Pendente |
 | 7 | Testes finais, documentação, instalador, release | Pendente |

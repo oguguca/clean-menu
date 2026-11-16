@@ -24,38 +24,37 @@
           <TextBlock Text="{Binding AnalysisHeadline}" Style="{StaticResource Text.SectionTitle}" FontSize="22" />
           <TextBlock Text="{Binding AnalysisHint}" Style="{StaticResource Text.Secondary}" Margin="0,8,0,22" MaxWidth="560" HorizontalAlignment="Left" />
 
-          <Button Style="{StaticResource Button.Primary}" Command="{Binding AnalyzeCommand}" HorizontalAlignment="Left"
-                  AutomationProperties.Name="Analisar meu computador"
-                  ToolTip="Verifica o computador e mostra o que pode ser melhorado. Não apaga nada."
-                  ToolTipService.ShowOnDisabled="True">
-            <StackPanel Orientation="Horizontal">
-              <TextBlock Text="{x:Static ui:Glyphs.Search}" Style="{StaticResource Text.Icon}" Margin="0,0,10,0" />
-              <TextBlock Text="ANALISAR MEU COMPUTADOR" />
-            </StackPanel>
-          </Button>
-
-          <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-            <StackPanel.Style>
-              <Style TargetType="StackPanel">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsAnalysisAvailable}" Value="True">
-                    <Setter Property="Visibility" Value="Collapsed" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </StackPanel.Style>
-            <TextBlock Text="{x:Static ui:Glyphs.Info}" Style="{StaticResource Text.Icon}" FontSize="13"
-                       Foreground="{DynamicResource Brush.TextSecondary}" Margin="0,0,8,0" />
-            <TextBlock Text="{Binding AnalysisUnavailableNote}" Style="{StaticResource Text.Caption}" />
+          <StackPanel Orientation="Horizontal">
+            <Button Style="{StaticResource Button.Primary}" Command="{Binding AnalyzeCommand}" HorizontalAlignment="Left"
+                    AutomationProperties.Name="Analisar meu computador"
+                    ToolTip="Verifica o computador e mostra o que pode ser melhorado. Não apaga nada.">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{x:Static ui:Glyphs.Search}" Style="{StaticResource Text.Icon}" Margin="0,0,10,0" />
+                <TextBlock Text="ANALISAR MEU COMPUTADOR" />
+              </StackPanel>
+            </Button>
+            <Button Style="{StaticResource Button.Secondary}" Command="{Binding OpenCleanupCommand}" Margin="12,0,0,0"
+                    Visibility="{Binding HasAnalysis, Converter={StaticResource BoolToVisibility}}"
+                    ToolTip="Abre a Limpeza Inteligente com o resultado desta análise.">
+              <TextBlock Text="Ver detalhes e limpar" />
+            </Button>
+            <Button Style="{StaticResource Button.Secondary}" Command="{Binding CancelAnalysisCommand}" Margin="12,0,0,0"
+                    Visibility="{Binding IsAnalyzing, Converter={StaticResource BoolToVisibility}}">
+              <TextBlock Text="Cancelar" />
+            </Button>
           </StackPanel>
+
+          <controls:UsageBar Value="{Binding AnalysisProgress}" Margin="0,16,0,0" MaxWidth="420" HorizontalAlignment="Left" Width="420"
+                             TrackBrush="{DynamicResource Brush.Track}" FillBrush="{DynamicResource Brush.Accent}"
+                             Visibility="{Binding IsAnalyzing, Converter={StaticResource BoolToVisibility}}" />
         </StackPanel>
 
-        <!-- Health ring: stays empty until there is a real result. -->
+        <!-- Health ring: empty until there is a real result; then colored by the measured state. -->
         <Grid Grid.Column="1" Width="150" Height="150" VerticalAlignment="Center"
-              AutomationProperties.Name="Saúde geral: ainda sem análise">
-          <controls:RingGauge Thickness="12" TrackBrush="{DynamicResource Brush.Track}" ValueBrush="{DynamicResource Brush.Accent}" />
+              AutomationProperties.Name="{Binding HealthLabel, StringFormat='Saúde geral: {0}'}">
+          <controls:RingGauge Value="{Binding HealthRingValue}" Thickness="12" Style="{StaticResource StatusRing}" />
           <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Text="—" Style="{StaticResource Text.Value}" FontSize="32" HorizontalAlignment="Center" />
+            <TextBlock Text="{Binding HealthLabel}" Style="{StaticResource Text.Value}" FontSize="28" HorizontalAlignment="Center" />
             <TextBlock Text="Saúde" Style="{StaticResource Text.Caption}" HorizontalAlignment="Center" />
           </StackPanel>
         </Grid>

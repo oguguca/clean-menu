@@ -46,11 +46,13 @@ public sealed partial class DashboardViewModel : PageViewModel
         ISystemInfoProvider systemInfo,
         IVolumeProvider volumes,
         IUiDispatcher dispatcher,
+        DashboardAnalysisServices analysisServices,
         string machineName,
         int osBuild)
         : base(PageCatalog.Get(AppPage.Dashboard))
     {
         ArgumentNullException.ThrowIfNull(osProfile);
+        _analysis = analysisServices ?? throw new ArgumentNullException(nameof(analysisServices));
         _monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
         _systemInfo = systemInfo ?? throw new ArgumentNullException(nameof(systemInfo));
         _volumes = volumes ?? throw new ArgumentNullException(nameof(volumes));
@@ -101,6 +103,7 @@ public sealed partial class DashboardViewModel : PageViewModel
 
         LoadVolumes();
         _ = LoadSystemInfoAsync();
+        InitializeAnalysis();
     }
 
     public string MachineName { get; }
@@ -130,19 +133,6 @@ public sealed partial class DashboardViewModel : PageViewModel
     public IReadOnlyList<MetricCardViewModel> LiveCards { get; }
 
     public ObservableCollection<VolumeRowViewModel> Volumes { get; } = [];
-
-    /// <summary>False until the analysis engine exists. The button stays visible but disabled.</summary>
-    public bool IsAnalysisAvailable { get; }
-
-    public string AnalysisHeadline { get; } = "Seu computador ainda não foi analisado";
-
-    public string AnalysisHint { get; } = "A análise só olha o computador. Nada é apagado ou alterado sem você confirmar.";
-
-    public string AnalysisUnavailableNote { get; } = "A análise fica disponível em uma próxima versão.";
-
-    // Placeholder until the analysis engine exists (Etapa 4). CanExecute is false, so it never runs.
-    [RelayCommand(CanExecute = nameof(IsAnalysisAvailable))]
-    private Task AnalyzeAsync() => Task.CompletedTask;
 
     [RelayCommand]
     private void RefreshVolumes() => LoadVolumes();

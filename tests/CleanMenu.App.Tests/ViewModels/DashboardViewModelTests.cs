@@ -14,22 +14,78 @@ public class DashboardViewModelTests
         FakeSystemInfo? info = null,
         FakeVolumes? volumes = null,
         string machine = "PC-TESTE",
-        int build = 26100) =>
+        int build = 26100,
+        CleanupFixture? cleanup = null,
+        NavigationService? navigation = null) =>
         new(new OsProfile(WindowsVersion.Windows11, null),
             monitor ?? new FakeLiveMonitor(),
             info ?? new FakeSystemInfo(FakeSystemInfo.Sample),
             volumes ?? new FakeVolumes(),
             new ImmediateUiDispatcher(),
+            new DashboardAnalysisServices(
+                (cleanup ?? new CleanupFixture()).Session,
+                navigation ?? new NavigationService(),
+                (cleanup ?? new CleanupFixture()).History),
             machine,
             build);
 
     [Fact]
-    public void AnalyzeCommand_IsDisabled_UntilAnalysisExists()
+    public async Task Analyze_FillsFreeableTempAndHealth_WithoutDeleting()
     {
-        var vm = Create();
+        using var cleanup = new CleanupFixture();
+        var monitor = new FakeLiveMonitor();
+        var vm = Create(monitor, volumes: new FakeVolumes(new VolumeInfo("C:", null, "NTFS", false, true, Gb.Of(500), Gb.Of(300))), cleanup: cleanup);
+        monitor.Raise(new LiveSample(DateTimeOffset.Now, 10, null, new MemoryStatus(Gb.Of(16), Gb.Of(8))));
 
-        Assert.False(vm.IsAnalysisAvailable);
-        Assert.False(vm.AnalyzeCommand.CanExecute(null));
+        Assert.True(vm.AnalyzeCommand.CanExecute(null));
+        await vm.AnalyzeCommand.ExecuteAsync(null);
+
+        Assert.True(vm.HasAnalysis);
+        Assert.Equal("1,5 GB", vm.FreeableCard.Value);
+        Assert.Equal("2", vm.TempFilesCard.Value);
+        Assert.Equal("Boa", vm.HealthLabel);
+        Assert.Equal(StatusLevel.Good, vm.HealthCard.Status);
+        Assert.Equal(2, cleanup.Files.Files.Count);
+    }
+
+    [Fact]
+    public async Task Health_UsesWorstRealMeasurement()
+    {
+        using var cleanup = new CleanupFixture();
+        var monitor = new FakeLiveMonitor();
+        var vm = Create(monitor, volumes: new FakeVolumes(new VolumeInfo("C:", null, "NTFS", false, true, Gb.Of(500), Gb.Of(10))), cleanup: cleanup);
+        monitor.Raise(new LiveSample(DateTimeOffset.Now, 10, null, new MemoryStatus(Gb.Of(16), Gb.Of(8))));
+
+        await vm.AnalyzeCommand.ExecuteAsync(null);
+
+        Assert.Equal("Crítica", vm.HealthLabel);
+        Assert.Contains("pouco espaço", vm.HealthCard.Caption, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void OpenCleanup_RequestsNavigation()
+    {
+        var navigation = new NavigationService();
+        CleanMenu.App.Navigation.AppPage? requested = null;
+        navigation.NavigationRequested += (_, page) => requested = page;
+        var vm = Create(navigation: navigation);
+
+        vm.OpenCleanupCommand.Execute(null);
+
+        Assert.Equal(CleanMenu.App.Navigation.AppPage.SmartCleanup, requested);
+    }
+
+    [Fact]
+    public async Task LastCleanup_ComesFromHistory()
+    {
+        using var cleanup = new CleanupFixture();
+        await cleanup.History.AddAsync(new Core.History.OperationRecord(Guid.NewGuid(), new DateTimeOffset(2026, 11, 10, 15, 0, 0, TimeSpan.Zero),
+            "Limpeza", ["x"], 10, Gb.Of(2), 0, [], "Concluída", false));
+
+        var vm = Create(cleanup: cleanup);
+
+        Assert.Equal("10/11/2026", vm.LastCleanupCard.Value);
+        Assert.Equal("Liberou 2 GB", vm.LastCleanupCard.Caption);
     }
 
     [Fact]
