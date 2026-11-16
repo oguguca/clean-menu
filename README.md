@@ -2,14 +2,13 @@
 
 Central de limpeza, manutenção, diagnóstico e otimização para Windows 10 e Windows 11.
 
-> **Status:** em desenvolvimento (v0.1.0). Funcionam: interface, detecção do Windows 10 / 11,
-> monitoramento em tempo real (processador, memória, placa de vídeo, discos, processos e informações
-> do sistema), análise do computador e Limpeza Inteligente (temporários, caches de navegadores,
-> miniaturas, relatórios de erro, Lixeira) com simulação, confirmação e histórico, Inicialização,
-> fechar processos com proteção, planos de energia, SFC/DISM/CHKDSK e otimização de HD/SSD. Limpezas que exigem
-> administrador e as demais seções ainda mostram "em construção".
+> **Status:** prévia (v0.1.0). As 12 seções funcionam: monitoramento em tempo real, análise do
+> computador, Limpeza Inteligente (com simulação, confirmação e histórico), Limpeza Avançada
+> (arquivos grandes, duplicados por SHA-256, pastas, sobras de programas; tudo vai para a Lixeira),
+> Memória RAM, Otimização, Inicialização, Processos, Discos (TRIM/desfragmentação), Ferramentas do
+> Windows, Informações do Sistema, Histórico e Configurações. Ainda não disponíveis: limpezas que
+> exigem administrador (temporários do Windows e arquivos antigos de atualização) e o instalador.
 > Regras de segurança da limpeza: [docs/cleanup-safety.md](docs/cleanup-safety.md).
-> O progresso real de cada módulo está na tabela [Roadmap](#roadmap).
 
 ---
 
@@ -116,7 +115,7 @@ O Clean Menu segue regras obrigatórias:
 | 3 | Monitoramento: sistema, CPU, RAM, discos, processos | Concluída |
 | 4 | Limpeza: motor de análise, temporários, caches, Lixeira, navegadores | Concluída |
 | 5 | Otimização: inicialização, processos, manutenção, HDD/SSD | Concluída |
-| 6 | Avançado: duplicados, arquivos grandes, histórico, configurações | Pendente |
+| 6 | Avançado: duplicados, arquivos grandes, histórico, configurações | Concluída |
 | 7 | Testes finais, documentação, instalador, release | Pendente |
 
 ## Como contribuir

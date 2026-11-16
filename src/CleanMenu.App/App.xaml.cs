@@ -1,11 +1,13 @@
 ﻿using System.Windows;
 using CleanMenu.App.Services;
 using CleanMenu.App.ViewModels;
+using CleanMenu.Core.Advanced;
 using CleanMenu.Core.Cleanup;
 using CleanMenu.Core.Disks;
 using CleanMenu.Core.History;
 using CleanMenu.Core.Maintenance;
 using CleanMenu.Core.Startup;
+using CleanMenu.Infrastructure.Advanced;
 using CleanMenu.Infrastructure.Cleanup;
 using CleanMenu.Infrastructure.History;
 using CleanMenu.Infrastructure.Maintenance;
@@ -137,6 +139,24 @@ public partial class App : Application
         services.AddTransient<SystemInfoViewModel>();
         services.AddTransient<DisksViewModel>();
         services.AddTransient<HistoryViewModel>();
+
+        // Advanced cleanup (files go to the Recycle Bin, never deleted for good)
+        services.AddSingleton<IFileHasher, Sha256FileHasher>();
+        services.AddSingleton<AdvancedScanner>();
+        services.AddSingleton<ILeftoverSource, WindowsLeftoverSource>();
+        services.AddSingleton<IRecycler, ShellRecycler>();
+        services.AddSingleton<IFolderPicker, FolderPicker>();
+        services.AddTransient(sp => new AdvancedCleanupViewModel(
+            sp.GetRequiredService<AdvancedScanner>(),
+            sp.GetRequiredService<ILeftoverSource>(),
+            sp.GetRequiredService<IRecycler>(),
+            sp.GetRequiredService<IFolderPicker>(),
+            sp.GetRequiredService<IProcessActions>(),
+            sp.GetRequiredService<IDialogService>(),
+            sp.GetRequiredService<IOperationHistory>(),
+            sp.GetRequiredService<ISystemActions>(),
+            AdvancedProtectedFolders.Get(),
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));
         services.AddTransient<WindowsToolsViewModel>();
         services.AddTransient(sp => new SettingsViewModel(
             sp.GetRequiredService<ISettingsStore>(),
