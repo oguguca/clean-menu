@@ -49,6 +49,9 @@ internal sealed class FakeDisks(params PhysicalDiskInfo[] disks) : IPhysicalDisk
 {
     public Task<IReadOnlyList<PhysicalDiskInfo>> GetDisksAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<PhysicalDiskInfo>>(disks);
+
+    public Task<IReadOnlyDictionary<string, DiskMedia>> GetVolumeMediaAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyDictionary<string, DiskMedia>>(new Dictionary<string, DiskMedia> { ["C"] = disks.FirstOrDefault()?.Media ?? DiskMedia.Unknown });
 }
 
 internal sealed class FakeProcessSource : IProcessSource

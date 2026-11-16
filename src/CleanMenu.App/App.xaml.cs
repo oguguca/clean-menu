@@ -4,8 +4,12 @@ using CleanMenu.App.ViewModels;
 using CleanMenu.Core.Cleanup;
 using CleanMenu.Core.Disks;
 using CleanMenu.Core.History;
+using CleanMenu.Core.Maintenance;
+using CleanMenu.Core.Startup;
 using CleanMenu.Infrastructure.Cleanup;
 using CleanMenu.Infrastructure.History;
+using CleanMenu.Infrastructure.Maintenance;
+using CleanMenu.Infrastructure.Startup;
 using CleanMenu.Core.Monitoring;
 using CleanMenu.Core.Platform;
 using CleanMenu.Core.Processes;
@@ -69,6 +73,13 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<INavigationService, NavigationService>();
 
+        // Startup, processes and maintenance
+        services.AddSingleton<IStartupManager, WindowsStartupManager>();
+        services.AddSingleton<IProcessActions, WindowsProcessActions>();
+        services.AddSingleton<IPowerPlanService, WindowsPowerPlanService>();
+        services.AddSingleton<IWindowsSettingsReader, WindowsSettingsReader>();
+        services.AddSingleton<IMaintenanceRunner, VisibleElevatedRunner>();
+
         // Navigation and pages
         services.AddSingleton<IPageFactory, PageFactory>();
         services.AddSingleton(sp => new MainViewModel(
@@ -84,10 +95,13 @@ public partial class App : Application
             new DashboardAnalysisServices(
                 sp.GetRequiredService<CleanupSession>(),
                 sp.GetRequiredService<INavigationService>(),
-                sp.GetRequiredService<IOperationHistory>()),
+                sp.GetRequiredService<IOperationHistory>(),
+                sp.GetRequiredService<IStartupManager>()),
             Environment.MachineName,
             sp.GetRequiredService<IOsVersionProvider>().GetOsVersion().Build));
         services.AddTransient<SmartCleanupViewModel>();
+        services.AddTransient<StartupViewModel>();
+        services.AddTransient<OptimizationViewModel>();
         services.AddTransient<MemoryViewModel>();
         services.AddTransient<ProcessesViewModel>();
         services.AddTransient<SystemInfoViewModel>();

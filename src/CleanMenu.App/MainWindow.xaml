@@ -29,6 +29,12 @@
     <DataTemplate DataType="{x:Type vm:SmartCleanupViewModel}">
       <views:SmartCleanupView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:StartupViewModel}">
+      <views:StartupView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:OptimizationViewModel}">
+      <views:OptimizationView />
+    </DataTemplate>
     <DataTemplate DataType="{x:Type vm:MemoryViewModel}">
       <views:MemoryView />
     </DataTemplate>

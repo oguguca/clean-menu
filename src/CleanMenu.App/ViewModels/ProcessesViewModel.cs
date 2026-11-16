@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CleanMenu.App.Navigation;
 using CleanMenu.App.Services;
+using CleanMenu.Core.History;
 using CleanMenu.Core.Processes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -16,7 +17,7 @@ public enum ProcessSortMode
 
 /// <summary>
 /// Processos page: every running process with CPU and memory, sortable and searchable.
-/// Read-only in this version (ending processes arrives with the protection rules in Etapa 5).
+/// Ending a process asks for confirmation and is refused for protected Windows processes.
 /// </summary>
 public sealed partial class ProcessesViewModel : PageViewModel
 {
@@ -36,13 +37,76 @@ public sealed partial class ProcessesViewModel : PageViewModel
     [ObservableProperty]
     private bool _isRefreshing;
 
-    public ProcessesViewModel(ProcessMonitor processes, IUiDispatcher dispatcher)
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(EndSelectedCommand), nameof(OpenLocationCommand), nameof(ShowPropertiesCommand))]
+    [NotifyPropertyChangedFor(nameof(SelectionHint))]
+    private ProcessRowViewModel? _selectedRow;
+
+    [ObservableProperty]
+    private string? _message;
+
+    private readonly IProcessActions _actions;
+    private readonly IDialogService _dialogs;
+    private readonly IOperationHistory _history;
+
+    public ProcessesViewModel(ProcessMonitor processes, IUiDispatcher dispatcher, IProcessActions actions, IDialogService dialogs, IOperationHistory history)
         : base(PageCatalog.Get(AppPage.Processes))
     {
         _processes = processes ?? throw new ArgumentNullException(nameof(processes));
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+        _dialogs = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
+        _history = history ?? throw new ArgumentNullException(nameof(history));
         _processes.Updated += (_, _) => _dispatcher.Post(Rebuild);
         Rebuild();
+    }
+
+    public string SelectionHint => SelectedRow is null
+        ? "Clique num item da lista para ver as ações."
+        : SelectedRow.IsProtected
+            ? $"{SelectedRow.Name}: faz parte do Windows e não pode ser fechado pelo Clean Menu."
+            : $"{SelectedRow.Name}: {SelectedRow.Advice}";
+
+    private bool CanEnd() => SelectedRow is { IsProtected: false };
+
+    private bool HasSelection() => SelectedRow is not null;
+
+    [RelayCommand(CanExecute = nameof(CanEnd))]
+    private async Task EndSelectedAsync()
+    {
+        if (SelectedRow is not { } row || row.IsProtected)
+        {
+            return;
+        }
+
+        if (!_dialogs.Confirm(new ConfirmationRequest(
+                $"Fechar \"{row.Name}\"?",
+                "O programa será fechado imediatamente. Trabalhos não salvos nele serão perdidos.",
+                ["Se for um programa que você está usando, prefira fechá-lo pela própria janela.", $"Processo: {row.Name} (PID {row.Pid})"],
+                "Fechar programa")))
+        {
+            return;
+        }
+
+        var result = await Task.Run(() => _actions.EndProcess(row.Pid, row.Name)).ConfigureAwait(true);
+        Message = ProcessEndText.Describe(result);
+        await _history.RecordActionAsync("Processo finalizado", $"{row.Name} (PID {row.Pid})", result == ProcessEndResult.Ended,
+            result == ProcessEndResult.Ended ? null : Message).ConfigureAwait(true);
+        await RefreshAsync().ConfigureAwait(true);
+    }
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void OpenLocation()
+    {
+        var path = SelectedRow is { } row ? _actions.GetExecutablePath(row.Pid) : null;
+        Message = path is not null && _actions.OpenFileLocation(path) ? null : "O Windows não informou onde fica este programa (é comum em processos do sistema).";
+    }
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ShowProperties()
+    {
+        var path = SelectedRow is { } row ? _actions.GetExecutablePath(row.Pid) : null;
+        Message = path is not null && _actions.ShowFileProperties(path) ? null : "O Windows não informou onde fica este programa (é comum em processos do sistema).";
     }
 
     public ObservableCollection<ProcessRowViewModel> Rows { get; } = [];

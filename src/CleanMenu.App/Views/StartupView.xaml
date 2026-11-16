@@ -1,0 +1,71 @@
+<UserControl x:Class="CleanMenu.App.Views.StartupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:CleanMenu.UI.Controls;assembly=CleanMenu.UI"
+             xmlns:ui="clr-namespace:CleanMenu.UI;assembly=CleanMenu.UI"
+             xmlns:vm="clr-namespace:CleanMenu.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:StartupViewModel}"
+             x:Name="Root"
+             Style="{StaticResource Page.Root}">
+  <StackPanel>
+    <controls:PageHeader Title="{Binding Title}" Description="{Binding Description}" />
+
+    <DockPanel Margin="0,28,14,6">
+      <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Command="{Binding RefreshCommand}">
+        <TextBlock Text="Atualizar" />
+      </Button>
+      <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" VerticalAlignment="Center" />
+    </DockPanel>
+    <TextBlock Style="{StaticResource Text.Caption}" Margin="0,0,14,12"
+               Text="Desligar um programa aqui não desinstala nada: ele só deixa de abrir sozinho. Na dúvida, deixe ligado o que for do fabricante do computador, antivírus e drivers." />
+    <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Caption}" Foreground="{DynamicResource Brush.Accent}" Margin="0,0,0,10"
+               Visibility="{Binding Message, Converter={StaticResource HasValue}}" />
+    <TextBlock Text="Lendo os programas…" Style="{StaticResource Text.Secondary}"
+               Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}" />
+
+    <ItemsControl ItemsSource="{Binding Rows}" Focusable="False">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate DataType="{x:Type vm:StartupRowViewModel}">
+          <Border Style="{StaticResource Card}" Margin="0,0,14,10" Padding="18,14">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <StackPanel Margin="0,0,16,0">
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="{Binding Name}" Style="{StaticResource Text.CardTitle}" />
+                  <Border Style="{StaticResource Tag.Border}" Margin="10,0,0,0">
+                    <TextBlock Text="{Binding StatusText}" FontSize="12" Foreground="{DynamicResource Brush.TextSecondary}" />
+                  </Border>
+                </StackPanel>
+                <TextBlock Text="{Binding PublisherText}" Style="{StaticResource Text.Caption}" Margin="0,4,0,0" FontSize="14" />
+                <TextBlock Text="{Binding SourceText}" Style="{StaticResource Text.Caption}" Margin="0,2,0,0" />
+                <TextBlock Text="{Binding PathText}" Style="{StaticResource Text.Caption}" Margin="0,2,0,0"
+                           Foreground="{DynamicResource Brush.TextMuted}" TextTrimming="CharacterEllipsis" ToolTip="{Binding PathText}" />
+                <TextBlock Text="{Binding LockText}" Style="{StaticResource Text.Caption}" Margin="0,6,0,0"
+                           Visibility="{Binding LockText, Converter={StaticResource HasValue}}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Style="{StaticResource Button.Ghost}" Margin="0,0,6,0"
+                        Command="{Binding DataContext.OpenLocationCommand, ElementName=Root}" CommandParameter="{Binding}"
+                        Visibility="{Binding HasFile, Converter={StaticResource BoolToVisibility}}"
+                        ToolTip="Abre a pasta onde o programa está instalado.">
+                  <TextBlock Text="Abrir local" />
+                </Button>
+                <Button Style="{StaticResource Button.Secondary}" MinWidth="96"
+                        Command="{Binding DataContext.ToggleCommand, ElementName=Root}" CommandParameter="{Binding}"
+                        IsEnabled="{Binding CanToggle}">
+                  <TextBlock Text="{Binding ToggleText}" />
+                </Button>
+              </StackPanel>
+            </Grid>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

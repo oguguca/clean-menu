@@ -13,6 +13,8 @@ public sealed class PageFactory(IServiceProvider services) : IPageFactory
         AppPage.Dashboard => services.GetRequiredService<DashboardViewModel>(),
         AppPage.SmartCleanup => services.GetRequiredService<SmartCleanupViewModel>(),
         AppPage.Memory => services.GetRequiredService<MemoryViewModel>(),
+        AppPage.Startup => services.GetRequiredService<StartupViewModel>(),
+        AppPage.Optimization => services.GetRequiredService<OptimizationViewModel>(),
         AppPage.Processes => services.GetRequiredService<ProcessesViewModel>(),
         AppPage.SystemInfo => services.GetRequiredService<SystemInfoViewModel>(),
         AppPage.Disks => services.GetRequiredService<DisksViewModel>(),

@@ -35,12 +35,29 @@
 
     <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Caption}" Margin="0,0,0,12" />
 
+    <!-- Actions for the selected process -->
     <Border Style="{StaticResource Card}" Margin="0,0,14,14" Padding="16">
-      <DockPanel>
-        <TextBlock Text="{x:Static ui:Glyphs.Info}" Style="{StaticResource Text.Icon}" Foreground="{DynamicResource Brush.Accent}" Margin="0,0,12,0" VerticalAlignment="Top" />
-        <TextBlock Style="{StaticResource Text.Secondary}"
-                   Text="Nesta versão você pode ver o que está rodando. A opção de fechar programas com segurança (sem deixar fechar o que é do Windows) chega em breve." />
-      </DockPanel>
+      <StackPanel>
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+            <Button Style="{StaticResource Button.Ghost}" Command="{Binding OpenLocationCommand}" Margin="0,0,6,0">
+              <TextBlock Text="Abrir local" />
+            </Button>
+            <Button Style="{StaticResource Button.Ghost}" Command="{Binding ShowPropertiesCommand}" Margin="0,0,6,0">
+              <TextBlock Text="Propriedades" />
+            </Button>
+            <Button Style="{StaticResource Button.Secondary}" Command="{Binding EndSelectedCommand}"
+                    ToolTipService.ShowOnDisabled="True"
+                    ToolTip="Fecha o programa selecionado. Processos do Windows são protegidos e não podem ser fechados.">
+              <TextBlock Text="Fechar programa" />
+            </Button>
+          </StackPanel>
+          <TextBlock Text="{x:Static ui:Glyphs.Info}" Style="{StaticResource Text.Icon}" Foreground="{DynamicResource Brush.Accent}" Margin="0,0,12,0" />
+          <TextBlock Text="{Binding SelectionHint}" Style="{StaticResource Text.Secondary}" VerticalAlignment="Center" />
+        </DockPanel>
+        <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Caption}" Margin="30,8,0,0" Foreground="{DynamicResource Brush.Accent}"
+                   Visibility="{Binding Message, Converter={StaticResource HasValue}}" />
+      </StackPanel>
     </Border>
 
     <Border Style="{StaticResource Card}" Margin="0,0,14,0" Padding="8">
@@ -60,7 +77,7 @@
         </Grid>
         <Border DockPanel.Dock="Top" Height="1" Background="{DynamicResource Brush.Border}" Margin="8,0" />
 
-        <ListBox ItemsSource="{Binding Rows}" Height="560" Background="Transparent" BorderThickness="0"
+        <ListBox ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow, Mode=TwoWay}" Height="560" Background="Transparent" BorderThickness="0"
                  ItemContainerStyle="{StaticResource Row.Item}"
                  VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"

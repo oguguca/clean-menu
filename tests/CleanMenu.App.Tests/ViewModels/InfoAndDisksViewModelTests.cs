@@ -40,7 +40,7 @@ public class InfoAndDisksViewModelTests
     [Fact]
     public void Disks_ListsVolumesAndPhysicalDisks()
     {
-        var vm = new DisksViewModel(new FakeVolumes(SystemDrive), new FakeDisks(Ssd), new ImmediateUiDispatcher());
+        var vm = new DisksViewModel(new FakeVolumes(SystemDrive), new FakeDisks(Ssd), new ImmediateUiDispatcher(), new FakeRunner(), new FakeDialogs(true), new MemoryHistory());
 
         var volume = Assert.Single(vm.Volumes);
         Assert.Equal(StatusLevel.Critical, volume.Status); // 20 GB of 476 GB = 4.2% free

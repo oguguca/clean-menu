@@ -34,4 +34,17 @@ public sealed class VolumeRowViewModel(VolumeInfo volume)
 
     /// <summary>Resource key of the bar color.</summary>
     public string BarBrushKey => Status.BrushKey();
+
+    /// <summary>Type of the disk behind this drive letter, when known.</summary>
+    public DiskMedia Media { get; init; } = DiskMedia.Unknown;
+
+    /// <summary>Drive letter without colon ("C").</summary>
+    public string Letter => Volume.Name.TrimEnd(':');
+
+    public string OptimizeExplanation => Media switch
+    {
+        DiskMedia.Ssd => "Este disco é SSD: o Windows usa o TRIM, que mantém o SSD rápido. SSD nunca é desfragmentado.",
+        DiskMedia.Hdd => "Este disco é HD: o Windows desfragmenta, juntando partes espalhadas dos arquivos.",
+        _ => "O Windows identifica o tipo do disco e escolhe a otimização certa (TRIM para SSD, desfragmentação para HD).",
+    };
 }

@@ -6,6 +6,7 @@ using CleanMenu.Core.Cleanup;
 using CleanMenu.Core.Formatting;
 using CleanMenu.Core.History;
 using CleanMenu.Core.Monitoring;
+using CleanMenu.Core.Startup;
 using CleanMenu.UI;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -13,7 +14,7 @@ using CommunityToolkit.Mvvm.Input;
 namespace CleanMenu.App.ViewModels;
 
 /// <summary>Services the dashboard needs for "ANALISAR MEU COMPUTADOR".</summary>
-public sealed record DashboardAnalysisServices(CleanupSession Session, INavigationService Navigation, IOperationHistory History);
+public sealed record DashboardAnalysisServices(CleanupSession Session, INavigationService Navigation, IOperationHistory History, IStartupManager? Startup = null);
 
 /// <summary>
 /// The computer analysis on the home page. It only reads: it measures what can be cleaned and
@@ -70,6 +71,7 @@ public sealed partial class DashboardViewModel : IDisposable
         try
         {
             await _analysis.Session.AnalyzeAsync(progress, _analysisCancellation.Token).ConfigureAwait(true);
+            await UpdateStartupCountAsync().ConfigureAwait(true);
         }
         catch (OperationCanceledException)
         {
@@ -95,11 +97,31 @@ public sealed partial class DashboardViewModel : IDisposable
     [RelayCommand]
     private void OpenCleanup() => _analysis.Navigation.NavigateTo(AppPage.SmartCleanup);
 
+    private async Task UpdateStartupCountAsync()
+    {
+        if (_analysis.Startup is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var entries = await _analysis.Startup.GetEntriesAsync().ConfigureAwait(true);
+            var enabled = entries.Count(e => e.IsEnabled);
+            StartupCard.With(enabled.ToString(PtBr), "abrem sozinhos ao ligar. Veja em Inicialização",
+                enabled > 12 ? StatusLevel.Warning : StatusLevel.Good);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            StartupCard.With(MetricCardViewModel.Pending, "Não foi possível ler a inicialização");
+        }
+    }
+
     private void InitializeAnalysis()
     {
         _analysis.Session.AnalysisChanged += (_, _) => _dispatcher.Post(ApplyAnalysis);
         _analysis.History.Changed += (_, _) => _ = LoadLastCleanupAsync();
-        StartupCard.With(MetricCardViewModel.Pending, "Disponível em uma próxima versão");
+        StartupCard.With(MetricCardViewModel.Pending, AfterAnalysis);
         ApplyAnalysis();
         _ = LoadLastCleanupAsync();
     }

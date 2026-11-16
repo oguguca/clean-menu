@@ -64,11 +64,24 @@ Aplicativo WPF. Inicializa o `Generic Host`, registra serviços, ViewModels e Vi
 navegação. ViewModels usam `CommunityToolkit.Mvvm` (`ObservableObject`, `RelayCommand`,
 `AsyncRelayCommand` com cancelamento).
 
+### Operações que precisam de administrador
+
+O aplicativo roda sempre sem privilégios. Ferramentas de manutenção (SFC, DISM, CHKDSK,
+otimização de unidades com `defrag /O`, ponto de restauração) vêm de uma **lista fechada**
+(`MaintenanceTool`), nunca de um comando livre. Antes de executar, o usuário vê o comando exato, o que
+ele faz e quanto tempo leva. Depois de confirmar, o comando abre numa **janela de console visível**
+(`cmd /k`), com elevação pedida pelo UAC só para aquele comando (`VisibleElevatedRunner`). Assim
+nenhum comando administrativo roda escondido, e o resultado fica na tela.
+
 ### CleanMenu.Elevated
-Executável separado com manifesto `requireAdministrator`. É iniciado pelo App somente quando uma
-operação precisa de privilégio (SFC, DISM, CHKDSK, `Optimize-Volume`, temporários do Windows, ponto
-de restauração). Recebe uma operação de uma lista fechada (nunca um comando livre), executa,
-devolve o resultado e encerra. O App mostra ao usuário o comando exato antes de pedir a elevação.
+Executável separado com manifesto `requireAdministrator`, reservado para limpezas que precisam de
+administrador (temporários do Windows, arquivos antigos de atualização). Ainda não executa nenhuma
+operação; essas categorias aparecem desativadas no aplicativo.
+
+### Inicialização
+Ligar e desligar programas usa o mesmo mecanismo do Gerenciador de Tarefas e das Configurações do
+Windows: o valor `StartupApproved` em `HKCU`. Nenhuma entrada é apagada. Itens de todos os usuários
+(`HKLM`, pasta Inicializar comum) e tarefas agendadas aparecem só para consulta.
 
 ## Windows 10 e Windows 11
 

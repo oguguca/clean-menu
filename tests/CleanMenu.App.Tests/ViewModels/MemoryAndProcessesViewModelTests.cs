@@ -77,7 +77,7 @@ public class MemoryAndProcessesViewModelTests
         source.Next = [Proc(1, "alpha", 0.5, cpuSeconds: 0.5), Proc(2, "beta", 2, cpuSeconds: 0), Proc(3, "gamma", 1, cpuSeconds: 0.1)];
         monitor.Refresh();
 
-        var vm = new ProcessesViewModel(monitor, new ImmediateUiDispatcher());
+        var vm = new ProcessesViewModel(monitor, new ImmediateUiDispatcher(), new FakeProcessActions(), new FakeDialogs(true), new MemoryHistory());
         Assert.Equal(["beta", "gamma", "alpha"], vm.Rows.Select(r => r.Name));
 
         vm.SortMode = ProcessSortMode.Cpu;
@@ -96,7 +96,7 @@ public class MemoryAndProcessesViewModelTests
         var (monitor, source, _) = CreateMonitor();
         source.Next = [Proc(1, "alpha", 0.5), Proc(2, "beta", 2)];
         monitor.Refresh();
-        var vm = new ProcessesViewModel(monitor, new ImmediateUiDispatcher());
+        var vm = new ProcessesViewModel(monitor, new ImmediateUiDispatcher(), new FakeProcessActions(), new FakeDialogs(true), new MemoryHistory());
         var beta = vm.Rows[0];
 
         source.Next = [Proc(1, "alpha", 0.6), Proc(2, "beta", 2.5)];
