@@ -26,6 +26,18 @@
     <DataTemplate DataType="{x:Type vm:SectionPlaceholderViewModel}">
       <views:SectionPlaceholderView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:MemoryViewModel}">
+      <views:MemoryView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:ProcessesViewModel}">
+      <views:ProcessesView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:SystemInfoViewModel}">
+      <views:SystemInfoView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:DisksViewModel}">
+      <views:DisksView />
+    </DataTemplate>
 
     <CollectionViewSource x:Key="NavItems" Source="{Binding Items}">
       <CollectionViewSource.GroupDescriptions>

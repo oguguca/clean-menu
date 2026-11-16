@@ -25,6 +25,18 @@ public partial class StatCard : UserControl
         nameof(Status), typeof(StatusLevel), typeof(StatCard),
         new PropertyMetadata(StatusLevel.Neutral, (d, _) => ((StatCard)d).UpdateStatus()));
 
+    public static readonly DependencyProperty HistoryProperty = DependencyProperty.Register(
+        nameof(History), typeof(IReadOnlyList<double>), typeof(StatCard),
+        new PropertyMetadata(null, (d, e) => ((StatCard)d).Chart.Visibility =
+            e.NewValue is IReadOnlyList<double> { Count: >= 2 } ? Visibility.Visible : Visibility.Collapsed));
+
+    /// <summary>Recent values for the mini chart. The chart appears once there are two values.</summary>
+    public IReadOnlyList<double>? History
+    {
+        get => (IReadOnlyList<double>?)GetValue(HistoryProperty);
+        set => SetValue(HistoryProperty, value);
+    }
+
     public StatCard()
     {
         InitializeComponent();

@@ -8,6 +8,7 @@
         <!-- Colors first: ThemeManager swaps this entry to change between dark and light. -->
         <ResourceDictionary Source="pack://application:,,,/CleanMenu.UI;component/Themes/Colors.Dark.xaml" />
         <ResourceDictionary Source="pack://application:,,,/CleanMenu.UI;component/Themes/Theme.xaml" />
+        <ResourceDictionary Source="Views/SharedTemplates.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

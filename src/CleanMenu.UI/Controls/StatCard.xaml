@@ -19,7 +19,7 @@
         </Border>
         <controls:InfoTip Text="{Binding HelpText, ElementName=Root}" DockPanel.Dock="Right" VerticalAlignment="Center" />
         <TextBlock Text="{Binding Title, ElementName=Root}" Style="{StaticResource Text.CardTitle}"
-                   Margin="12,0,8,0" VerticalAlignment="Center" />
+                   TextTrimming="None" TextWrapping="Wrap" Margin="12,0,8,0" VerticalAlignment="Center" />
       </DockPanel>
 
       <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,16,0,4" VerticalAlignment="Bottom">
@@ -27,7 +27,11 @@
         <TextBlock Text="{Binding Value, ElementName=Root}" Style="{StaticResource Text.Value}" />
       </StackPanel>
 
-      <TextBlock Grid.Row="2" Text="{Binding Caption, ElementName=Root}" Style="{StaticResource Text.Caption}" />
+      <StackPanel Grid.Row="2">
+        <TextBlock Text="{Binding Caption, ElementName=Root}" Style="{StaticResource Text.Caption}" />
+        <controls:Sparkline x:Name="Chart" Height="36" Margin="0,12,0,0" Visibility="Collapsed"
+                            Values="{Binding History, ElementName=Root}" Stroke="{DynamicResource Brush.Accent}" />
+      </StackPanel>
     </Grid>
   </Border>
 </UserControl>

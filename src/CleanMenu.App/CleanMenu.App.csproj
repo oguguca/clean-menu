@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="CleanMenu.App.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CleanMenu.Core\CleanMenu.Core.csproj" />
     <ProjectReference Include="..\CleanMenu.Infrastructure\CleanMenu.Infrastructure.csproj" />
     <ProjectReference Include="..\CleanMenu.UI\CleanMenu.UI.csproj" />
