@@ -195,7 +195,7 @@ public sealed partial class NetworkViewModel : PageViewModel, IDisposable
     private void ApplyFilter()
     {
         Adapters.Clear();
-        foreach (var adapter in _all.Where(a => ShowAllAdapters || (a.IsConnected && a.Kind != AdapterKind.Virtual)))
+        foreach (var adapter in _all.Where(a => ShowAllAdapters || (a.IsConnected && a.Kind != AdapterKind.Virtual && a.IPv4Addresses.Count > 0)))
         {
             Adapters.Add(new NetworkAdapterRowViewModel(adapter));
         }

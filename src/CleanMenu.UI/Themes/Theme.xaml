@@ -223,6 +223,39 @@
   </Style>
 
   <!-- ===== Text input ===== -->
+  <!-- Plain text input (addresses, names). -->
+  <Style x:Key="TextBox.Input" TargetType="TextBox">
+    <Setter Property="Background" Value="{DynamicResource Brush.Card}" />
+    <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource Brush.Text}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource Brush.Accent}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TextBox">
+          <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="1" CornerRadius="8" Padding="10,9">
+            <Grid>
+              <TextBlock x:Name="Placeholder" Text="{TemplateBinding Tag}" Margin="2,0,0,0" VerticalAlignment="Center"
+                         Foreground="{DynamicResource Brush.TextMuted}" Visibility="Collapsed" IsHitTestVisible="False" />
+              <ScrollViewer x:Name="PART_ContentHost" Padding="0" VerticalAlignment="Center" />
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Text" Value="">
+              <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Brush.Accent}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <Style x:Key="TextBox.Search" TargetType="TextBox">
     <Setter Property="Background" Value="{DynamicResource Brush.Card}" />
     <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />

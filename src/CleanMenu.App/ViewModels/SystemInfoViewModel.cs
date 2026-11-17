@@ -54,6 +54,9 @@ public sealed partial class SystemInfoViewModel : PageViewModel
 
     public ObservableCollection<FactGroup> Groups { get; } = [];
 
+    /// <summary>Security, services and USB: shown full width because their lists are long.</summary>
+    public ObservableCollection<FactGroup> StatusGroups { get; } = [];
+
     [RelayCommand]
     private void CopyReport()
     {
@@ -78,12 +81,12 @@ public sealed partial class SystemInfoViewModel : PageViewModel
             var volumes = _volumes.GetVolumes();
             var info = await infoTask.ConfigureAwait(false);
             var disks = await disksTask.ConfigureAwait(false);
-            var groups = BuildGroups(info, volumes, disks).ToList();
+            var groups = BuildGroups(info, volumes, disks);
+            IReadOnlyList<FactGroup> statusGroups = [];
             var report = SystemReport.Build(info, volumes, disks);
             if (_devices is not null)
             {
-                var statusGroups = await Task.Run(() => BuildStatusGroups(_devices)).ConfigureAwait(false);
-                groups.AddRange(statusGroups);
+                statusGroups = await Task.Run(() => BuildStatusGroups(_devices)).ConfigureAwait(false);
                 report += Environment.NewLine + string.Join(Environment.NewLine, statusGroups
                     .Where(g => g.Title != "Serviços importantes")
                     .SelectMany(g => g.Facts.Select(f => $"{g.Title} - {f.Label}: {f.Value}")));
@@ -95,6 +98,12 @@ public sealed partial class SystemInfoViewModel : PageViewModel
                 foreach (var group in groups)
                 {
                     Groups.Add(group);
+                }
+
+                StatusGroups.Clear();
+                foreach (var group in statusGroups)
+                {
+                    StatusGroups.Add(group);
                 }
 
                 _report = report;

@@ -61,7 +61,13 @@ public sealed class WindowsNetworkInfoProvider : INetworkInfoProvider
     private static AdapterKind Classify(NetworkInterface nic)
     {
         var description = nic.Description;
-        if (description.Contains("Virtual", StringComparison.OrdinalIgnoreCase)
+        if (nic.GetPhysicalAddress().GetAddressBytes().Length == 0
+            || description.Contains("Miniport", StringComparison.OrdinalIgnoreCase)
+            || description.Contains("Packet Scheduler", StringComparison.OrdinalIgnoreCase)
+            || description.Contains("Filter", StringComparison.OrdinalIgnoreCase)
+            || description.Contains("Wi-Fi Direct", StringComparison.OrdinalIgnoreCase)
+            || description.Contains("Kernel Debug", StringComparison.OrdinalIgnoreCase)
+            || description.Contains("Virtual", StringComparison.OrdinalIgnoreCase)
             || description.Contains("Hyper-V", StringComparison.OrdinalIgnoreCase)
             || description.Contains("VPN", StringComparison.OrdinalIgnoreCase)
             || description.Contains("TAP-", StringComparison.OrdinalIgnoreCase)

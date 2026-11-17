@@ -32,7 +32,7 @@
             <Button DockPanel.Dock="Right" Style="{StaticResource Button.Primary}" Command="{Binding PingCommand}" Margin="10,0,0,0">
               <TextBlock Text="Testar" />
             </Button>
-            <TextBox Style="{StaticResource TextBox.Search}" Text="{Binding PingHost, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Style="{StaticResource TextBox.Input}" Text="{Binding PingHost, UpdateSourceTrigger=PropertyChanged}"
                      AutomationProperties.Name="Endereço para testar" />
           </DockPanel>
           <TextBlock Text="{Binding PingResult}" Style="{StaticResource Text.Body}" Margin="0,12,0,0" TextWrapping="Wrap"
@@ -177,7 +177,7 @@
           <Button DockPanel.Dock="Right" Style="{StaticResource Button.Primary}" Command="{Binding DownloadCommand}" Margin="10,0,0,0">
             <TextBlock Text="Baixar" />
           </Button>
-          <TextBox Style="{StaticResource TextBox.Search}" Text="{Binding DownloadUrl, UpdateSourceTrigger=PropertyChanged}"
+          <TextBox Style="{StaticResource TextBox.Input}" Tag="https://exemplo.com/arquivo.zip" Text="{Binding DownloadUrl, UpdateSourceTrigger=PropertyChanged}"
                    AutomationProperties.Name="Endereço do arquivo" />
         </DockPanel>
 

@@ -5,8 +5,10 @@ Central de limpeza, manutenção, diagnóstico e otimização para Windows 10 e 
 > **Status:** prévia (v0.1.0). As 12 seções funcionam: monitoramento em tempo real, análise do
 > computador, Limpeza Inteligente (com simulação, confirmação e histórico), Limpeza Avançada
 > (arquivos grandes, duplicados por SHA-256, pastas, sobras de programas; tudo vai para a Lixeira),
-> Memória RAM, Otimização, Inicialização, Processos, Discos (TRIM/desfragmentação), Ferramentas do
-> Windows, Informações do Sistema, Histórico e Configurações. Ainda não disponíveis: limpezas que
+> Memória RAM (com memória virtual), Otimização (SFC, DISM, CHKDSK, reset do Windows Update, winget,
+> registros de eventos, políticas de grupo), Inicialização, Processos, Discos (TRIM/desfragmentação),
+> Rede e Internet (ping, teste de velocidade, ipconfig, reset de rede, download HTTPS), Ferramentas do
+> Windows, Informações do Sistema (antivírus, serviços, USB), Histórico e Configurações (atualizações). Ainda não disponíveis: limpezas que
 > exigem administrador (temporários do Windows e arquivos antigos de atualização) e o instalador.
 > Regras de segurança da limpeza: [docs/cleanup-safety.md](docs/cleanup-safety.md).
 
@@ -33,6 +35,7 @@ Central de limpeza, manutenção, diagnóstico e otimização para Windows 10 e 
 | Inicialização | Registro, pastas de inicialização e tarefas agendadas; habilitar/desabilitar sem excluir |
 | Processos | Lista ordenável por CPU/memória, finalização protegida |
 | Discos | Modelo, tipo (HDD/SSD), SMART quando disponível, TRIM para SSD, desfragmentação apenas para HDD |
+| Rede e Internet | Ping, teste de velocidade real (Cloudflare), IP/gateway/DNS de cada placa, reset de rede, download HTTPS com SHA-256 |
 | Ferramentas Windows | Atalhos para ferramentas nativas, adaptados ao Windows 10 ou 11 |
 | Informações do Sistema | Hardware e software detalhados |
 | Histórico | Registro de todas as operações executadas |
