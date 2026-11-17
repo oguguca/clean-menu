@@ -19,9 +19,13 @@ internal sealed class FakeCleanupFileSystem : ICleanupFileSystem
 
     public IReadOnlyCollection<string> Files => _files.Keys;
 
-    public void Add(string path, long size, DateTimeOffset lastWrite, FileAttributes attributes = FileAttributes.Normal)
+    public void Add(string path, long size, DateTimeOffset lastWrite, FileAttributes attributes = FileAttributes.Normal) =>
+        Put(new CleanupFile(path, size, lastWrite, attributes));
+
+    public void Put(CleanupFile file)
     {
-        _files[path] = new CleanupFile(path, size, lastWrite, attributes);
+        var path = file.Path;
+        _files[path] = file;
         var dir = Path.GetDirectoryName(path);
         while (!string.IsNullOrEmpty(dir))
         {

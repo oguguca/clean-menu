@@ -1,9 +1,37 @@
 namespace CleanMenu.Core.Cleanup;
 
 /// <summary>A file found during analysis.</summary>
-public sealed record CleanupFile(string Path, long SizeBytes, DateTimeOffset LastWriteUtc, FileAttributes Attributes)
+/// <param name="LastAccessUtc">Last time the file was opened, when Windows records it.</param>
+/// <param name="CreationUtc">When the file appeared on this disk (copied, downloaded or created).</param>
+public sealed record CleanupFile(
+    string Path,
+    long SizeBytes,
+    DateTimeOffset LastWriteUtc,
+    FileAttributes Attributes,
+    DateTimeOffset? LastAccessUtc = null,
+    DateTimeOffset? CreationUtc = null)
 {
     public bool IsReparsePoint => Attributes.HasFlag(FileAttributes.ReparsePoint);
+
+    /// <summary>Most recent sign of use: opened, changed or placed on the disk.</summary>
+    public DateTimeOffset LastUsedUtc
+    {
+        get
+        {
+            var latest = LastWriteUtc;
+            if (LastAccessUtc > latest)
+            {
+                latest = LastAccessUtc.Value;
+            }
+
+            if (CreationUtc > latest)
+            {
+                latest = CreationUtc.Value;
+            }
+
+            return latest;
+        }
+    }
 }
 
 /// <summary>Result of trying to delete one file.</summary>

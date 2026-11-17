@@ -43,6 +43,16 @@ public static class AdvancedFileRules
         ".bat", ".cmd", ".ps1", ".vbs", ".lnk", ".url", ".sav",
     };
 
+    /// <summary>
+    /// Files used (opened, changed or placed on the disk) within this period are never offered:
+    /// something the user works with often must never disappear.
+    /// </summary>
+    public static readonly TimeSpan RecentUseWindow = TimeSpan.FromDays(90);
+
+    /// <summary>True when the file shows any sign of use within <see cref="RecentUseWindow"/>.</summary>
+    public static bool IsRecentlyUsed(DateTimeOffset lastUsedUtc, DateTimeOffset now) =>
+        now - lastUsedUtc < RecentUseWindow;
+
     /// <summary>True when the path is inside a folder that belongs to a program, tool or project.</summary>
     public static bool IsInProgramArea(string path)
     {

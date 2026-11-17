@@ -239,6 +239,7 @@ public sealed class CleanupEngine(
     private bool IsEligible(CleanupFile file, string root, TimeSpan minimumAge, DateTimeOffset now) =>
         !file.IsReparsePoint
         && !file.Attributes.HasFlag(FileAttributes.System)
-        && now - file.LastWriteUtc >= minimumAge
+        // A temporary file a program opened recently is still in use by it, even if old.
+        && now - file.LastUsedUtc >= minimumAge
         && validator.Validate(file.Path, root) == PathRejection.None;
 }

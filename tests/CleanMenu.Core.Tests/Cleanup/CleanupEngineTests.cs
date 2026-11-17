@@ -42,6 +42,17 @@ public class CleanupEngineTests
     }
 
     [Fact]
+    public void Analyze_KeepsOldTempFilesThatAProgramOpenedRecently()
+    {
+        _fs.Put(new CleanupFile(Temp + @"\em-uso.tmp", 100, Old, FileAttributes.Normal, LastAccessUtc: Recent));
+        _fs.Add(Temp + @"\esquecido.tmp", 100, Old);
+
+        var result = _engine.AnalyzeCategory(TempCategory);
+
+        Assert.Equal([Temp + @"\esquecido.tmp"], result.Files.Select(f => f.Path));
+    }
+
+    [Fact]
     public void Analyze_NeverIncludesCredentialFiles()
     {
         _fs.Add(Temp + @"\Network\Cookies", 100, Old);

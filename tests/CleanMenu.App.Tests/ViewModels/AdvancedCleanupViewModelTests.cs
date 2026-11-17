@@ -48,8 +48,8 @@ public class AdvancedCleanupViewModelTests
     public async Task LargeFiles_ExcludeDownloads_UnlessAllowed()
     {
         var files = new MemoryFileSystem();
-        files.Add(Profile + @"\Videos\filme.mkv", Gb.Of(2), DateTimeOffset.UtcNow);
-        files.Add(Profile + @"\Downloads\backup.zip", Gb.Of(1), DateTimeOffset.UtcNow);
+        files.Add(Profile + @"\Videos\filme.mkv", Gb.Of(2), DateTimeOffset.UtcNow.AddDays(-200));
+        files.Add(Profile + @"\Downloads\backup.zip", Gb.Of(1), DateTimeOffset.UtcNow.AddDays(-200));
         var (vm, _, _, _) = Create(files);
 
         await vm.ScanCommand.ExecuteAsync(null);
@@ -75,8 +75,8 @@ public class AdvancedCleanupViewModelTests
     public async Task Duplicates_MarkCopiesKeepsOldest_AndRecycleNeedsConfirmation()
     {
         var files = new MemoryFileSystem();
-        files.Add(Profile + @"\a\foto.jpg", Gb.Of(0.1), DateTimeOffset.UtcNow.AddDays(-30));
-        files.Add(Profile + @"\b\foto.jpg", Gb.Of(0.1), DateTimeOffset.UtcNow);
+        files.Add(Profile + @"\a\foto.jpg", Gb.Of(0.1), DateTimeOffset.UtcNow.AddDays(-400));
+        files.Add(Profile + @"\b\foto.jpg", Gb.Of(0.1), DateTimeOffset.UtcNow.AddDays(-200));
         var (vm, recycler, dialogs, history) = Create(files);
         vm.Mode = AdvancedMode.Duplicates;
 
@@ -100,8 +100,8 @@ public class AdvancedCleanupViewModelTests
     public async Task Recycle_WarnsWhenAllCopiesOfAGroupAreChecked()
     {
         var files = new MemoryFileSystem();
-        files.Add(Profile + @"\a\doc.pdf", Gb.Of(0.1), DateTimeOffset.UtcNow);
-        files.Add(Profile + @"\b\doc.pdf", Gb.Of(0.1), DateTimeOffset.UtcNow);
+        files.Add(Profile + @"\a\doc.pdf", Gb.Of(0.1), DateTimeOffset.UtcNow.AddDays(-200));
+        files.Add(Profile + @"\b\doc.pdf", Gb.Of(0.1), DateTimeOffset.UtcNow.AddDays(-200));
         var (vm, recycler, dialogs, _) = Create(files, confirm: false);
         vm.Mode = AdvancedMode.Duplicates;
         await vm.ScanCommand.ExecuteAsync(null);

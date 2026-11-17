@@ -143,8 +143,8 @@ public sealed partial class AdvancedCleanupViewModel : PageViewModel, IDisposabl
 
     public string ModeHint => Mode switch
     {
-        AdvancedMode.LargeFiles => "Arquivos com mais de 100 MB. Marque os que você não quer mais: eles vão para a Lixeira.",
-        AdvancedMode.Duplicates => "Arquivos idênticos (mesmo tamanho e mesmo conteúdo, conferido com SHA-256). Mantenha pelo menos uma cópia de cada.",
+        AdvancedMode.LargeFiles => "Arquivos com mais de 100 MB que você não usa há mais de 3 meses. Marque os que você não quer mais: eles vão para a Lixeira.",
+        AdvancedMode.Duplicates => "Arquivos idênticos (mesmo tamanho e mesmo conteúdo, conferido com SHA-256) que você não usa há mais de 3 meses. Mantenha pelo menos uma cópia de cada.",
         AdvancedMode.Folders => "As pastas que mais ocupam espaço dentro da pasta escolhida. Clique para abrir e decidir o que fazer.",
         _ => "Pastas de programas que parecem não estar mais instalados e não são usadas há mais de 6 meses. São só sugestões: confira antes de apagar qualquer coisa.",
     };
@@ -326,7 +326,8 @@ public sealed partial class AdvancedCleanupViewModel : PageViewModel, IDisposabl
         foreach (var file in selected)
         {
             // Last line of defense: never touch program, app-data or project files, whatever the list says.
-            if (!AdvancedFileRules.CanRecycle(file.Path) || _protectedFolders.Any(p => IsSameOrInside(file.Path, p)))
+            // Also refuses anything changed or used since the scan.
+            if (!_scanner.CanStillRecycle(file.File) || _protectedFolders.Any(p => IsSameOrInside(file.Path, p)))
             {
                 failed++;
                 continue;

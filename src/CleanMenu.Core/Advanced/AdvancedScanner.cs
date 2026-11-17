@@ -23,8 +23,14 @@ public sealed record FolderSize(string Path, long SizeBytes, int FileCount);
 /// Read-only analyses for the Limpeza Avançada page. Nothing here deletes files: results are shown
 /// to the user, who decides what to send to the Recycle Bin.
 /// </summary>
-public sealed class AdvancedScanner(ICleanupFileSystem fileSystem, IFileHasher hasher)
+public sealed class AdvancedScanner(
+    ICleanupFileSystem fileSystem,
+    IFileHasher hasher,
+    IRecentFiles? recentFiles = null,
+    TimeProvider? time = null)
 {
+    private readonly TimeProvider _time = time ?? TimeProvider.System;
+
     public const long DefaultLargeFileBytes = 100L * 1024 * 1024;
     public const long DefaultDuplicateMinBytes = 1L * 1024 * 1024;
 
@@ -36,8 +42,9 @@ public sealed class AdvancedScanner(ICleanupFileSystem fileSystem, IFileHasher h
         int maxResults = 200,
         CancellationToken cancellationToken = default)
     {
+        var inUse = InUseFilter();
         return Enumerate(root, excluded, cancellationToken)
-            .Where(f => f.SizeBytes >= minBytes && AdvancedFileRules.CanOfferLargeFile(f.Path))
+            .Where(f => f.SizeBytes >= minBytes && AdvancedFileRules.CanOfferLargeFile(f.Path) && !inUse(f))
             .OrderByDescending(f => f.SizeBytes)
             .Take(maxResults)
             .ToList();
@@ -55,8 +62,10 @@ public sealed class AdvancedScanner(ICleanupFileSystem fileSystem, IFileHasher h
         CancellationToken cancellationToken = default)
     {
         progress?.Report(new OperationProgress("Listando arquivos", 0));
+        // Recently used files are dropped before hashing: reading them to compare would itself look like use.
+        var inUse = InUseFilter();
         var candidates = Enumerate(root, excluded, cancellationToken)
-            .Where(f => f.SizeBytes >= minBytes && AdvancedFileRules.CanOfferDuplicate(f.Path))
+            .Where(f => f.SizeBytes >= minBytes && AdvancedFileRules.CanOfferDuplicate(f.Path) && !inUse(f))
             .GroupBy(f => f.SizeBytes)
             .Where(g => g.Count() > 1)
             .ToList();
@@ -113,6 +122,46 @@ public sealed class AdvancedScanner(ICleanupFileSystem fileSystem, IFileHasher h
             .Select(kv => new FolderSize(kv.Key, kv.Value.Bytes, kv.Value.Count))
             .OrderByDescending(f => f.SizeBytes)
             .ToList();
+    }
+
+    /// <summary>
+    /// Final check right before a file found by a scan goes to the Recycle Bin: it must still exist,
+    /// be unchanged and show no recent use. The access date comes from the scan, because comparing
+    /// duplicates reads the files and Windows then records that reading as an access.
+    /// </summary>
+    public bool CanStillRecycle(CleanupFile scanned)
+    {
+        ArgumentNullException.ThrowIfNull(scanned);
+        if (!AdvancedFileRules.CanRecycle(scanned.Path))
+        {
+            return false;
+        }
+
+        var current = fileSystem.GetFile(scanned.Path);
+        if (current is null || current.LastWriteUtc != scanned.LastWriteUtc || current.SizeBytes != scanned.SizeBytes)
+        {
+            return false;
+        }
+
+        var fresh = current with { LastAccessUtc = scanned.LastAccessUtc };
+        return !InUseFilter()(fresh);
+    }
+
+    /// <summary>Recognizes files the user is using: recent sign of use, or in Windows' recent items.</summary>
+    private Func<CleanupFile, bool> InUseFilter()
+    {
+        var now = _time.GetUtcNow();
+        IReadOnlySet<string> recent;
+        try
+        {
+            recent = recentFiles?.GetRecentlyOpened() ?? new HashSet<string>();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            recent = new HashSet<string>();
+        }
+
+        return file => AdvancedFileRules.IsRecentlyUsed(file.LastUsedUtc, now) || recent.Contains(file.Path);
     }
 
     private IEnumerable<CleanupFile> Enumerate(string root, IReadOnlyCollection<string> excluded, CancellationToken cancellationToken)

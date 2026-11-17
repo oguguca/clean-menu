@@ -81,3 +81,28 @@ Os arquivos foram restaurados da Lixeira. Desde então valem estas regras (`Adva
 5. Arquivos de programa (`.exe`, `.dll`, `.node`, `.js`, `.json`, `.wasm`, `.pak`...) nunca aparecem,
    nem em "Arquivos grandes".
 6. As regras são conferidas de novo imediatamente antes de mandar cada arquivo para a Lixeira.
+
+## Arquivos usados com frequência nunca saem
+
+Pedido do usuário: "de forma alguma é para apagar arquivos que são utilizados frequentemente".
+
+1. Limpeza Avançada ("Arquivos grandes" e "Duplicados") só mostra arquivos sem nenhum sinal de uso
+   há mais de 3 meses (`AdvancedFileRules.RecentUseWindow`). Contam como uso:
+   - abrir o arquivo (data de último acesso, quando o Windows registra);
+   - alterar o arquivo (data de modificação);
+   - colocar o arquivo no disco: baixar, copiar ou criar (data de criação).
+2. Arquivos da lista de "Itens recentes" do Windows (`%APPDATA%\Microsoft\Windows\Recent`) nunca
+   aparecem, mesmo com datas antigas. A lista só é lida; os atalhos não são alterados.
+3. Arquivos usados recentemente são descartados antes da comparação SHA-256. Assim, o próprio
+   Clean Menu não lê esses arquivos.
+4. Logo antes de mandar cada arquivo para a Lixeira, ele é lido de novo. O envio é recusado se:
+   - o arquivo sumiu;
+   - mudou de tamanho ou de data;
+   - foi criado ou copiado de novo;
+   - entrou nos itens recentes.
+
+   A data de acesso usada nessa conferência é a da análise, porque a comparação de duplicados
+   lê os arquivos e o Windows registra essa leitura como acesso.
+5. Limpeza Inteligente (temporários): um arquivo temporário antigo que um programa abriu
+   recentemente também é mantido, porque a idade mínima conta o último sinal de uso.
+6. Se a lista de itens recentes não puder ser lida, a regra dos 3 meses continua valendo.

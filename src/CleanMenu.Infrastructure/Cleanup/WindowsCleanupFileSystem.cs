@@ -46,7 +46,7 @@ public sealed class WindowsCleanupFileSystem : ICleanupFileSystem
                 }
 
                 var file = enumerator.Current;
-                item = new CleanupFile(file.FullName, file.Length, new DateTimeOffset(file.LastWriteTimeUtc, TimeSpan.Zero), file.Attributes);
+                item = ToCleanupFile(file);
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
@@ -66,7 +66,7 @@ public sealed class WindowsCleanupFileSystem : ICleanupFileSystem
         {
             var info = new FileInfo(path);
             return info.Exists
-                ? new CleanupFile(info.FullName, info.Length, new DateTimeOffset(info.LastWriteTimeUtc, TimeSpan.Zero), info.Attributes)
+                ? ToCleanupFile(info)
                 : null;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -74,6 +74,14 @@ public sealed class WindowsCleanupFileSystem : ICleanupFileSystem
             return null;
         }
     }
+
+    private static CleanupFile ToCleanupFile(FileInfo file) => new(
+        file.FullName,
+        file.Length,
+        new DateTimeOffset(file.LastWriteTimeUtc, TimeSpan.Zero),
+        file.Attributes,
+        new DateTimeOffset(file.LastAccessTimeUtc, TimeSpan.Zero),
+        new DateTimeOffset(file.CreationTimeUtc, TimeSpan.Zero));
 
     public DeleteOutcome DeleteFile(string path)
     {

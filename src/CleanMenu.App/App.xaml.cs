@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using CleanMenu.App.Services;
 using CleanMenu.App.ViewModels;
 using CleanMenu.Core.Advanced;
@@ -143,6 +143,7 @@ public partial class App : Application
 
         // Advanced cleanup (files go to the Recycle Bin, never deleted for good)
         services.AddSingleton<IFileHasher, Sha256FileHasher>();
+        services.AddSingleton<IRecentFiles, WindowsRecentFiles>();
         services.AddSingleton<AdvancedScanner>();
         services.AddSingleton<ILeftoverSource, WindowsLeftoverSource>();
         services.AddSingleton<IRecycler, ShellRecycler>();

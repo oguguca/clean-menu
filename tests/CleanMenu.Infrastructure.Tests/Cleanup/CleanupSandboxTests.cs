@@ -41,7 +41,10 @@ public sealed class CleanupSandboxTests : IDisposable
         var path = Path.Combine(folder, name);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllBytes(path, new byte[sizeBytes]);
+        // Every date counts as use, so an "old" file must look old in all of them.
+        File.SetCreationTimeUtc(path, DateTime.UtcNow - age);
         File.SetLastWriteTimeUtc(path, DateTime.UtcNow - age);
+        File.SetLastAccessTimeUtc(path, DateTime.UtcNow - age);
         return path;
     }
 
