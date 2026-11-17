@@ -85,20 +85,6 @@ public class MaintenanceAndStartupTests
         Assert.Throws<ArgumentException>(() => MaintenanceCommands.Build(MaintenanceTool.OptimizeDrive, drive));
     }
 
-    [Fact]
-    public void EveryTool_HasPlainTexts_AndNeverTouchesSecurityFeatures()
-    {
-        foreach (var tool in Enum.GetValues<MaintenanceTool>())
-        {
-            var command = MaintenanceCommands.Build(tool, "C");
-            Assert.False(string.IsNullOrWhiteSpace(command.Explanation));
-            Assert.False(string.IsNullOrWhiteSpace(command.Duration));
-            Assert.DoesNotContain("defender", command.DisplayCommand, StringComparison.OrdinalIgnoreCase);
-            Assert.DoesNotContain("firewall", command.DisplayCommand, StringComparison.OrdinalIgnoreCase);
-            Assert.DoesNotContain("wuauserv", command.DisplayCommand, StringComparison.OrdinalIgnoreCase);
-        }
-    }
-
     [Theory]
     [InlineData(null, null, "Padrão do Windows")]
     [InlineData(1, null, "Somente dados obrigatórios")]

@@ -33,11 +33,15 @@ internal sealed class FakeRunner(bool result = true) : IMaintenanceRunner
 {
     public List<MaintenanceCommand> Started { get; } = [];
 
-    public bool StartVisibleElevated(MaintenanceCommand command)
+    public bool StartVisible(MaintenanceCommand command)
     {
         Started.Add(command);
         return result;
     }
+
+    public HashSet<string> Missing { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public bool IsAvailable(MaintenanceCommand command) => !Missing.Contains(command.Program);
 }
 
 internal sealed class FakeStartupManager(params StartupEntry[] entries) : IStartupManager

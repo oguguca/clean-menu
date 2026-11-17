@@ -50,9 +50,7 @@ public sealed partial class DisksViewModel : PageViewModel
     [ObservableProperty]
     private bool _isLoading = true;
 
-    private readonly IMaintenanceRunner _runner;
-    private readonly IDialogService _dialogs;
-    private readonly IOperationHistory _history;
+    private readonly MaintenanceLauncher _launcher;
 
     [ObservableProperty]
     private string? _message;
@@ -69,9 +67,7 @@ public sealed partial class DisksViewModel : PageViewModel
         _volumes = volumes ?? throw new ArgumentNullException(nameof(volumes));
         _disks = disks ?? throw new ArgumentNullException(nameof(disks));
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
-        _runner = runner ?? throw new ArgumentNullException(nameof(runner));
-        _dialogs = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
-        _history = history ?? throw new ArgumentNullException(nameof(history));
+        _launcher = new MaintenanceLauncher(runner, dialogs, history);
         _ = RefreshAsync();
     }
 
@@ -134,24 +130,10 @@ public sealed partial class DisksViewModel : PageViewModel
             return;
         }
 
-        var command = MaintenanceCommands.Build(tool, volume.Letter);
-        var details = new List<string> { $"Comando que será executado: {command.DisplayCommand}", command.Duration };
-        if (extra is not null)
+        var message = await _launcher.RunAsync(MaintenanceCommands.Build(tool, volume.Letter), "Manutenção de disco", extra).ConfigureAwait(true);
+        if (message is not null)
         {
-            details.Insert(0, extra);
+            Message = message;
         }
-
-        details.Add("O Windows vai pedir permissão de administrador só para este comando.");
-
-        if (!_dialogs.Confirm(new ConfirmationRequest($"{command.Title}?", command.Explanation, details, "Executar", IsDestructive: false)))
-        {
-            return;
-        }
-
-        var started = _runner.StartVisibleElevated(command);
-        Message = started
-            ? $"\"{command.Title}\" foi iniciado numa janela própria. O resultado aparece lá."
-            : "O comando não foi iniciado (a permissão de administrador foi negada ou o Windows recusou).";
-        await _history.RecordActionAsync("Manutenção de disco", command.Title, started, started ? null : "Não iniciado").ConfigureAwait(true);
     }
 }

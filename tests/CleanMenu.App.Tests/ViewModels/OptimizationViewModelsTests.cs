@@ -70,7 +70,7 @@ public class OptimizationViewModelsTests
         await vm.RunToolCommand.ExecuteAsync(vm.Tools.Single(t => t.Command.Tool == MaintenanceTool.SystemFileCheck));
 
         Assert.Contains(dialogs.Requests[0].Details, d => d.Contains("sfc.exe /scannow", StringComparison.Ordinal));
-        Assert.Equal("sfc.exe", Assert.Single(runner.Started).FileName);
+        Assert.Equal(MaintenanceTool.SystemFileCheck, Assert.Single(runner.Started).Tool);
         Assert.Equal("Manutenção do Windows", Assert.Single(history.Records).Type);
     }
 

@@ -57,8 +57,25 @@ public class MaintenanceProviderTests
         var args = VisibleElevatedRunner.BuildArguments(MaintenanceCommands.Build(MaintenanceTool.SystemFileCheck));
 
         Assert.StartsWith("/k ", args, StringComparison.Ordinal);
-        Assert.Contains("echo Clean Menu - executando: sfc.exe /scannow", args, StringComparison.Ordinal);
-        Assert.EndsWith("sfc.exe /scannow", args, StringComparison.Ordinal);
+        Assert.Contains("echo Clean Menu - executando: sfc.exe /scannow & sfc.exe /scannow", args, StringComparison.Ordinal);
+        Assert.Contains("echo Clean Menu - terminado", args, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Runner_EchoNeverRunsOperators()
+    {
+        Assert.Equal("a ^&^& b ^| c ^> d", VisibleElevatedRunner.EscapeForEcho("a && b | c > d"));
+        Assert.Equal("x \"C:\\a & b\" ^& y", VisibleElevatedRunner.EscapeForEcho("x \"C:\\a & b\" & y"));
+    }
+
+    [Fact]
+    public void Runner_FindsWindowsPrograms()
+    {
+        var runner = new VisibleElevatedRunner();
+        var sfc = MaintenanceCommands.Build(MaintenanceTool.SystemFileCheck);
+
+        Assert.True(runner.IsAvailable(sfc));
+        Assert.False(runner.IsAvailable(sfc with { Program = "nao-existe-123.exe" }));
     }
 
     [Fact]
