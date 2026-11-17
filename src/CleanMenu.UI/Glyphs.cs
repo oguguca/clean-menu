@@ -24,5 +24,6 @@ public static class Glyphs
     public const string Warning = "";
     public const string Chart = "";
     public const string Page = "";
+    public const string Globe = "";
     public const string OpenExternal = "";
 }

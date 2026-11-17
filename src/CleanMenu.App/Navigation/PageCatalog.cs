@@ -84,6 +84,16 @@ public static class PageCatalog
                 "Otimizar o disco do jeito certo para cada tipo",
             ], 5),
 
+        new(AppPage.Network, "Rede e Internet",
+            "Veja se a internet está funcionando, teste a velocidade e conserte problemas de conexão.",
+            Glyphs.Globe, GroupComputer, false,
+            [
+                "Testar a conexão (ping) e a velocidade da internet",
+                "Ver o endereço IP, o roteador e o DNS de cada conexão",
+                "Consertar a internet quando ela parar de funcionar",
+                "Baixar um arquivo de um endereço seguro (https)",
+            ], 7),
+
         new(AppPage.WindowsTools, "Ferramentas do Windows",
             "Atalhos para ferramentas que já vêm no Windows, explicadas em palavras simples.",
             Glyphs.Repair, GroupComputer, false,

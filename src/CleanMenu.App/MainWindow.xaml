@@ -56,6 +56,9 @@
     <DataTemplate DataType="{x:Type vm:SystemInfoViewModel}">
       <views:SystemInfoView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:NetworkViewModel}">
+      <views:NetworkView />
+    </DataTemplate>
     <DataTemplate DataType="{x:Type vm:DisksViewModel}">
       <views:DisksView />
     </DataTemplate>

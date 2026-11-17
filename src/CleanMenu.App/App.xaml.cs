@@ -158,6 +158,36 @@ public partial class App : Application
             AdvancedProtectedFolders.Get(),
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));
         services.AddTransient<WindowsToolsViewModel>();
+
+        // Network: read-only adapter info, real ping and speed tests, HTTPS-only downloads.
+        services.AddSingleton(_ =>
+        {
+            var http = new System.Net.Http.HttpClient { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("CleanMenu/0.1");
+            return http;
+        });
+        services.AddSingleton<CleanMenu.Core.Network.INetworkInfoProvider, CleanMenu.Infrastructure.Network.WindowsNetworkInfoProvider>();
+        services.AddSingleton<CleanMenu.Core.Network.IConnectivityTester, CleanMenu.Infrastructure.Network.PingConnectivityTester>();
+        services.AddSingleton<CleanMenu.Core.Network.ISpeedTester, CleanMenu.Infrastructure.Network.CloudflareSpeedTester>();
+        services.AddSingleton<CleanMenu.Core.Network.IFileDownloader, CleanMenu.Infrastructure.Network.HttpsFileDownloader>();
+        services.AddSingleton<ISaveFilePicker, SaveFilePicker>();
+        services.AddTransient(sp => new NetworkViewModel(
+            sp.GetRequiredService<CleanMenu.Core.Network.INetworkInfoProvider>(),
+            sp.GetRequiredService<CleanMenu.Core.Network.IConnectivityTester>(),
+            sp.GetRequiredService<CleanMenu.Core.Network.ISpeedTester>(),
+            sp.GetRequiredService<CleanMenu.Core.Network.IFileDownloader>(),
+            sp.GetRequiredService<IFileHasher>(),
+            sp.GetRequiredService<ISaveFilePicker>(),
+            sp.GetRequiredService<IProcessActions>(),
+            sp.GetRequiredService<ISystemActions>(),
+            sp.GetRequiredService<IMaintenanceRunner>(),
+            sp.GetRequiredService<IDialogService>(),
+            sp.GetRequiredService<IOperationHistory>(),
+            System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")));
+        services.AddSingleton(sp => new MaintenancePathProvider(
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            sp.GetRequiredService<TimeProvider>()));
         services.AddTransient(sp => new SettingsViewModel(
             sp.GetRequiredService<ISettingsStore>(),
             sp.GetRequiredService<IAutoStartService>(),

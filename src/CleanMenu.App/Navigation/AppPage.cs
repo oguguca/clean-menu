@@ -11,6 +11,7 @@ public enum AppPage
     Startup,
     Processes,
     Disks,
+    Network,
     WindowsTools,
     SystemInfo,
     History,
