@@ -143,5 +143,27 @@
         </StackPanel>
       </DockPanel>
     </Border>
+
+    <TextBlock Text="Atualizações" Style="{StaticResource Text.SectionTitle}" Margin="0,24,0,12" />
+    <Border Style="{StaticResource SettingRow}">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+          <Button Style="{StaticResource Button.Ghost}" Command="{Binding OpenReleasesCommand}" Margin="0,0,8,0">
+            <TextBlock Text="Abrir página de versões" />
+          </Button>
+          <Button Style="{StaticResource Button.Secondary}" Command="{Binding CheckUpdatesCommand}">
+            <TextBlock Text="Procurar atualização" />
+          </Button>
+        </StackPanel>
+        <StackPanel Margin="0,0,16,0">
+          <TextBlock Style="{StaticResource Text.CardTitle}">
+            <Run Text="Versão instalada:" /> <Run Text="{Binding CurrentVersion, Mode=OneWay}" />
+          </TextBlock>
+          <TextBlock Text="{Binding UpdateText}" Style="{StaticResource Text.Caption}" FontSize="14" Margin="0,4,0,0" TextWrapping="Wrap"
+                     Visibility="{Binding UpdateText, Converter={StaticResource HasValue}}" />
+          <TextBlock Text="Só consulta a página do projeto no GitHub. Nada é baixado ou instalado sozinho." Style="{StaticResource Text.Caption}" Margin="0,4,0,0" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
   </StackPanel>
 </UserControl>

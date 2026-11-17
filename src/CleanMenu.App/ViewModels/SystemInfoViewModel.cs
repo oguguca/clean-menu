@@ -10,7 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 namespace CleanMenu.App.ViewModels;
 
 /// <summary>A labeled fact ("Processador": "Intel Core i5…").</summary>
-public sealed record FactItem(string Label, string Value);
+public sealed record FactItem(string Label, string Value, bool NeedsAttention = false);
 
 /// <summary>A titled group of facts.</summary>
 public sealed record FactGroup(string Title, string Glyph, IReadOnlyList<FactItem> Facts);
@@ -25,6 +25,7 @@ public sealed partial class SystemInfoViewModel : PageViewModel
     private readonly IPhysicalDiskProvider _disks;
     private readonly ISystemActions _actions;
     private readonly IUiDispatcher _dispatcher;
+    private readonly IDeviceStatusProvider? _devices;
     private string? _report;
 
     [ObservableProperty]
@@ -38,7 +39,8 @@ public sealed partial class SystemInfoViewModel : PageViewModel
         IVolumeProvider volumes,
         IPhysicalDiskProvider disks,
         ISystemActions actions,
-        IUiDispatcher dispatcher)
+        IUiDispatcher dispatcher,
+        IDeviceStatusProvider? devices = null)
         : base(PageCatalog.Get(AppPage.SystemInfo))
     {
         _systemInfo = systemInfo ?? throw new ArgumentNullException(nameof(systemInfo));
@@ -46,6 +48,7 @@ public sealed partial class SystemInfoViewModel : PageViewModel
         _disks = disks ?? throw new ArgumentNullException(nameof(disks));
         _actions = actions ?? throw new ArgumentNullException(nameof(actions));
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        _devices = devices;
         _ = LoadAsync();
     }
 
@@ -63,6 +66,9 @@ public sealed partial class SystemInfoViewModel : PageViewModel
         Message = "Informações copiadas. Agora é só colar (Ctrl+V) na conversa com quem está te ajudando.";
     }
 
+    [RelayCommand]
+    private Task RefreshAsync() => LoadAsync();
+
     internal async Task LoadAsync()
     {
         try
@@ -72,8 +78,16 @@ public sealed partial class SystemInfoViewModel : PageViewModel
             var volumes = _volumes.GetVolumes();
             var info = await infoTask.ConfigureAwait(false);
             var disks = await disksTask.ConfigureAwait(false);
-            var groups = BuildGroups(info, volumes, disks);
+            var groups = BuildGroups(info, volumes, disks).ToList();
             var report = SystemReport.Build(info, volumes, disks);
+            if (_devices is not null)
+            {
+                var statusGroups = await Task.Run(() => BuildStatusGroups(_devices)).ConfigureAwait(false);
+                groups.AddRange(statusGroups);
+                report += Environment.NewLine + string.Join(Environment.NewLine, statusGroups
+                    .Where(g => g.Title != "Serviços importantes")
+                    .SelectMany(g => g.Facts.Select(f => $"{g.Title} - {f.Label}: {f.Value}")));
+            }
 
             _dispatcher.Post(() =>
             {
@@ -95,6 +109,30 @@ public sealed partial class SystemInfoViewModel : PageViewModel
                 Message = "Não foi possível ler as informações do sistema agora. Tente abrir esta página de novo.";
             });
         }
+    }
+
+    /// <summary>Antivirus, important services and USB devices (read-only).</summary>
+    internal static IReadOnlyList<FactGroup> BuildStatusGroups(IDeviceStatusProvider devices)
+    {
+        var antivirus = devices.GetAntivirus();
+        var security = antivirus.Count == 0
+            ? [new FactItem("Antivírus", "Nenhum antivírus informado pela Central de Segurança", NeedsAttention: true)]
+            : antivirus.Select(a => new FactItem(a.Name, a.StatusText, a.NeedsAttention)).ToList();
+
+        var services = devices.GetImportantServices()
+            .Select(s => new FactItem(s.Title, s.StatusText, s.NeedsAttention))
+            .ToList();
+
+        var usb = devices.GetUsbDevices()
+            .Select(d => new FactItem(d.Name, d.IsWorking ? d.Kind : $"{d.Kind} · com problema", !d.IsWorking))
+            .ToList();
+
+        return
+        [
+            new("Segurança (antivírus)", UI.Glyphs.CheckMark, security),
+            new("Serviços importantes", UI.Glyphs.Settings, services.Count > 0 ? services : [new FactItem("Serviços", NotReported)]),
+            new("Dispositivos USB conectados", UI.Glyphs.Laptop, usb.Count > 0 ? usb : [new FactItem("Dispositivos", "Nenhum dispositivo USB encontrado")]),
+        ];
     }
 
     internal static IReadOnlyList<FactGroup> BuildGroups(SystemInformation info, IReadOnlyList<VolumeInfo> volumes, IReadOnlyList<PhysicalDiskInfo> disks)

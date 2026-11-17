@@ -21,12 +21,12 @@ public static partial class WindowTheme
     private const int TextColorAttribute = 36;
 
     // COLORREF is 0x00BBGGRR. Values match Brush.Sidebar / Brush.Text of each theme.
-    private const int DarkCaption = 0x001E1815;   // #15181E
-    private const int DarkText = 0x00F4F0EE;      // #EEF0F4
+    private const int DarkCaption = 0x00301108;   // #081130
+    private const int DarkText = 0x00FFF3EE;      // #EEF3FF
     private const int LightCaption = 0x00FFFFFF;  // #FFFFFF
-    private const int LightText = 0x001E1815;     // #15181E
-    private const int DarkBorder = 0x003C302A;    // #2A303C
-    private const int LightBorder = 0x00E8E2DF;   // #DFE2E8
+    private const int LightText = 0x0030150B;     // #0B1530
+    private const int DarkBorder = 0x005C2D1C;    // #1C2D5C
+    private const int LightBorder = 0x00F2E0D6;   // #D6E0F2
 
     public static void ApplyTitleBar(Window window, bool dark)
     {

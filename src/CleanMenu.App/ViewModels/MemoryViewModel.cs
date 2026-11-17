@@ -61,7 +61,8 @@ public sealed partial class MemoryViewModel : PageViewModel
         ProcessMonitor processes,
         ISystemInfoProvider systemInfo,
         ISystemActions actions,
-        IUiDispatcher dispatcher)
+        IUiDispatcher dispatcher,
+        CleanMenu.Core.SystemInfo.IDeviceStatusProvider? devices = null)
         : base(PageCatalog.Get(AppPage.Memory))
     {
         ArgumentNullException.ThrowIfNull(systemInfo);
@@ -79,6 +80,11 @@ public sealed partial class MemoryViewModel : PageViewModel
         }
 
         ApplyProcesses();
+
+        if (devices is not null)
+        {
+            _ = LoadPageFilesAsync(devices);
+        }
         _ = LoadInstalledAsync(systemInfo);
     }
 
@@ -181,5 +187,26 @@ public sealed partial class MemoryViewModel : PageViewModel
         {
             // Reserved memory stays "Não identificado".
         }
+    }
+
+    /// <summary>Virtual memory (page file) summary, or null while not read.</summary>
+    [ObservableProperty]
+    private string? _pageFileText;
+
+    private async Task LoadPageFilesAsync(CleanMenu.Core.SystemInfo.IDeviceStatusProvider devices)
+    {
+        var files = await Task.Run(devices.GetPageFiles).ConfigureAwait(false);
+        var text = files.Count == 0
+            ? "O Windows não informou nenhum arquivo de paginação."
+            : string.Join(Environment.NewLine, files.Select(f =>
+                $"{f.Path}: {f.AllocatedMb:N0} MB reservados · {f.CurrentUsageMb:N0} MB em uso agora · pico de {f.PeakUsageMb:N0} MB desde que o computador ligou."));
+        _dispatcher.Post(() => PageFileText = text);
+    }
+
+    [RelayCommand]
+    private void OpenVirtualMemorySettings()
+    {
+        // Opens "Opções de desempenho" on the "Avançado" tab, where the virtual memory size is set.
+        _actions.OpenTool("SystemPropertiesPerformance.exe");
     }
 }

@@ -136,6 +136,7 @@ public partial class App : Application
         services.AddTransient<OptimizationViewModel>();
         services.AddTransient<MemoryViewModel>();
         services.AddTransient<ProcessesViewModel>();
+        services.AddSingleton<IDeviceStatusProvider, WindowsDeviceStatusProvider>();
         services.AddTransient<SystemInfoViewModel>();
         services.AddTransient<DisksViewModel>();
         services.AddTransient<HistoryViewModel>();
@@ -194,7 +195,9 @@ public partial class App : Application
             sp.GetRequiredService<ISystemActions>(),
             sp.GetRequiredService<CleanupSession>(),
             sp.GetRequiredService<OsProfile>(),
-            theme => ThemeManager.Apply(Current, theme == ThemePreference.Light ? AppTheme.Light : AppTheme.Dark)));
+            theme => ThemeManager.Apply(Current, theme == ThemePreference.Light ? AppTheme.Light : AppTheme.Dark),
+            sp.GetRequiredService<IUpdateChecker>()));
+        services.AddSingleton<IUpdateChecker, GitHubUpdateChecker>();
 
         // Shell
         services.AddSingleton<MainWindow>();

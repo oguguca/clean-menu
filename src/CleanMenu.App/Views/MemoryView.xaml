@@ -123,6 +123,26 @@
       </ItemsControl>
     </Border>
 
+    <!-- ===== Virtual memory ===== -->
+    <Border Style="{StaticResource Card}" Margin="0,20,14,0" Visibility="{Binding PageFileText, Converter={StaticResource HasValue}}">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" VerticalAlignment="Center" Margin="16,0,0,0"
+                Command="{Binding OpenVirtualMemorySettingsCommand}"
+                ToolTip="Abre as Opções de desempenho do Windows. A memória virtual fica na aba Avançado.">
+          <TextBlock Text="Ajustar memória virtual" />
+        </Button>
+        <StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Memória virtual (arquivo de paginação)" Style="{StaticResource Text.CardTitle}" />
+            <controls:InfoTip Margin="8,0,0,0" Text="Quando a RAM enche, o Windows guarda partes dos programas no disco (memória virtual ou swap). Deixar o tamanho 'gerenciado pelo sistema' é o recomendado na maioria dos casos." />
+          </StackPanel>
+          <TextBlock Text="{Binding PageFileText}" Style="{StaticResource Text.Secondary}" Margin="0,8,0,0" TextWrapping="Wrap" />
+          <TextBlock Style="{StaticResource Text.Caption}" Margin="0,8,0,0" TextWrapping="Wrap"
+                     Text="Se o uso fica sempre alto, o computador precisa de mais RAM: nenhum programa consegue criar memória que não existe." />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
     <!-- ===== Honest explanation ===== -->
     <Border Style="{StaticResource Card}" Margin="0,20,14,0">
       <StackPanel>

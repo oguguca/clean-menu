@@ -65,9 +65,11 @@ public sealed partial class SettingsViewModel : PageViewModel
         ISystemActions actions,
         CleanupSession cleanup,
         OsProfile osProfile,
-        Action<ThemePreference> applyTheme)
+        Action<ThemePreference> applyTheme,
+        IUpdateChecker? updates = null)
         : base(PageCatalog.Get(AppPage.Settings))
     {
+        _updates = updates;
         ArgumentNullException.ThrowIfNull(osProfile);
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _autoStart = autoStart ?? throw new ArgumentNullException(nameof(autoStart));
@@ -95,6 +97,48 @@ public sealed partial class SettingsViewModel : PageViewModel
     }
 
     public string DetectedWindows { get; }
+
+    private readonly IUpdateChecker? _updates;
+
+    [ObservableProperty]
+    private string? _updateText;
+
+    [ObservableProperty]
+    private bool _isCheckingUpdates;
+
+    /// <summary>Version of this build ("0.1.0").</summary>
+    public string CurrentVersion { get; } =
+        typeof(SettingsViewModel).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "0.0.0";
+
+    [RelayCommand]
+    private async Task CheckUpdatesAsync()
+    {
+        if (_updates is null || IsCheckingUpdates)
+        {
+            return;
+        }
+
+        IsCheckingUpdates = true;
+        UpdateText = "Procurando versões novas no GitHub…";
+        var result = await _updates.CheckAsync(CurrentVersion).ConfigureAwait(true);
+        UpdateText = result.Status switch
+        {
+            UpdateStatus.NewVersion => $"Existe uma versão nova: {result.LatestVersion}. Clique em \"Abrir página de versões\" para baixar.",
+            UpdateStatus.UpToDate => "Você já está usando a versão mais recente.",
+            UpdateStatus.NoReleasesYet => "Ainda não há versões publicadas no GitHub.",
+            _ => "Não foi possível verificar agora. Confira se a internet está funcionando.",
+        };
+        IsCheckingUpdates = false;
+    }
+
+    [RelayCommand]
+    private void OpenReleases()
+    {
+        if (_updates is not null)
+        {
+            _actions.OpenTool(_updates.ReleasesPage.AbsoluteUri);
+        }
+    }
 
     public string DataFolder => _store.DataFolder;
 
