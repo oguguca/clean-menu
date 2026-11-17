@@ -146,11 +146,8 @@
 
     <!-- ===== Page content ===== -->
     <ScrollViewer x:Name="PageScroller" Grid.Column="1" VerticalScrollBarVisibility="Auto" Focusable="False">
-      <!-- Content stretches up to 1180px and stays left-aligned on wide screens. -->
-      <Grid Margin="44,36,30,44">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" MaxWidth="1180" />
-        </Grid.ColumnDefinitions>
+      <!-- Content fills the window; only on very wide screens it stops at 1680px and stays centered. -->
+      <Grid Margin="44,36,30,44" MaxWidth="1680" HorizontalAlignment="Stretch">
         <ContentControl Content="{Binding CurrentPage}" Focusable="False" />
       </Grid>
     </ScrollViewer>
