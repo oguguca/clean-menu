@@ -325,6 +325,13 @@ public sealed partial class AdvancedCleanupViewModel : PageViewModel, IDisposabl
         var failed = 0;
         foreach (var file in selected)
         {
+            // Last line of defense: never touch program, app-data or project files, whatever the list says.
+            if (!AdvancedFileRules.CanRecycle(file.Path) || _protectedFolders.Any(p => IsSameOrInside(file.Path, p)))
+            {
+                failed++;
+                continue;
+            }
+
             if (_recycler.SendToRecycleBin(file.Path) == RecycleOutcome.Recycled)
             {
                 recycled++;

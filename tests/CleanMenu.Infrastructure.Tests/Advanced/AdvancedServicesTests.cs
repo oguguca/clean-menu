@@ -39,7 +39,9 @@ public sealed class AdvancedServicesTests : IDisposable
         Assert.Equal(RecycleOutcome.Refused, recycler.SendToRecycleBin(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe")));
         Assert.Equal(RecycleOutcome.Refused, recycler.SendToRecycleBin(@"\\servidor\share\x.txt"));
         Assert.Equal(RecycleOutcome.Refused, recycler.SendToRecycleBin("relativo.txt"));
-        Assert.Equal(RecycleOutcome.NotFound, recycler.SendToRecycleBin(Path.Combine(_sandbox, "nao-existe.txt")));
+        // The sandbox lives in %TEMP%, inside AppData: program data is never recycled.
+        Assert.Equal(RecycleOutcome.Refused, recycler.SendToRecycleBin(Path.Combine(_sandbox, "nao-existe.txt")));
+        Assert.Equal(RecycleOutcome.Refused, recycler.SendToRecycleBin(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "x", "a.png")));
         Assert.True(File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe")));
     }
 

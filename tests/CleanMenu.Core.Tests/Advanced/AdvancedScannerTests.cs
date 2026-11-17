@@ -126,4 +126,30 @@ public class AdvancedScannerTests
     {
         Assert.Equal(expected, LeftoverFinder.Normalize(input));
     }
+
+    [Fact]
+    public async Task Duplicates_NeverIncludeProjectsAppDataOrProgramFiles()
+    {
+        var fs = new FakeCleanupFileSystem();
+        var hashes = new Dictionary<string, string?>();
+        void Same(string path)
+        {
+            fs.Add(path, 5 * Mb, T0);
+            hashes[path] = "H";
+        }
+
+        Same(Root + @"\Projetos\site\package.json");                       // marks the project
+        Same(Root + @"\Projetos\site\src\assets\logo.png");                // project file
+        Same(Root + @"\Projetos\outro\src\logo.png");
+        fs.Directories.Add(Root + @"\Projetos\outro\.git");                 // git repository
+        Same(Root + @"\AppData\Local\Programs\Microsoft VS Code\a\icon.png");
+        Same(Root + @"\Documents\tool\lib.dll");
+        Same(Root + @"\Pictures\foto.jpg");                                 // the only real duplicate pair
+        Same(Root + @"\Desktop\foto (1).jpg");
+
+        var groups = await new AdvancedScanner(fs, new ContentHasher(hashes)).FindDuplicatesAsync(Root, []);
+
+        var group = Assert.Single(groups);
+        Assert.Equal([Root + @"\Pictures\foto.jpg", Root + @"\Desktop\foto (1).jpg"], group.Files.Select(f => f.Path).Order().Reverse());
+    }
 }

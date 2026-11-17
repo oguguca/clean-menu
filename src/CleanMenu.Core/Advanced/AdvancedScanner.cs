@@ -37,7 +37,7 @@ public sealed class AdvancedScanner(ICleanupFileSystem fileSystem, IFileHasher h
         CancellationToken cancellationToken = default)
     {
         return Enumerate(root, excluded, cancellationToken)
-            .Where(f => f.SizeBytes >= minBytes)
+            .Where(f => f.SizeBytes >= minBytes && AdvancedFileRules.CanOfferLargeFile(f.Path))
             .OrderByDescending(f => f.SizeBytes)
             .Take(maxResults)
             .ToList();
@@ -56,7 +56,7 @@ public sealed class AdvancedScanner(ICleanupFileSystem fileSystem, IFileHasher h
     {
         progress?.Report(new OperationProgress("Listando arquivos", 0));
         var candidates = Enumerate(root, excluded, cancellationToken)
-            .Where(f => f.SizeBytes >= minBytes)
+            .Where(f => f.SizeBytes >= minBytes && AdvancedFileRules.CanOfferDuplicate(f.Path))
             .GroupBy(f => f.SizeBytes)
             .Where(g => g.Count() > 1)
             .ToList();
@@ -122,15 +122,54 @@ public sealed class AdvancedScanner(ICleanupFileSystem fileSystem, IFileHasher h
             yield break;
         }
 
+        var projectCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
         foreach (var file in fileSystem.EnumerateFiles(root, "*", recursive: true))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (file.IsReparsePoint || excluded.Any(e => file.Path.StartsWith(Path.TrimEndingDirectorySeparator(e) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)))
+            if (file.IsReparsePoint
+                || excluded.Any(e => file.Path.StartsWith(Path.TrimEndingDirectorySeparator(e) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                || IsInsideProject(Path.GetDirectoryName(file.Path), projectCache))
             {
                 continue;
             }
 
             yield return file;
         }
+    }
+
+    /// <summary>Files that mark a folder as a software project (everything inside belongs to it).</summary>
+    private static readonly HashSet<string> ProjectMarkerFiles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "package.json", "pyproject.toml", "requirements.txt", "setup.py", "Pipfile", "Cargo.toml", "go.mod", "pom.xml",
+        "build.gradle", "build.gradle.kts", "settings.gradle", "composer.json", "Gemfile", "CMakeLists.txt", "Makefile",
+        "pubspec.yaml", "Directory.Build.props", "global.json", "project.godot", "ProjectSettings.asset",
+    };
+
+    private static readonly HashSet<string> ProjectMarkerExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".sln", ".slnx", ".csproj", ".vbproj", ".fsproj", ".vcxproj", ".uproject", ".xcodeproj",
+    };
+
+    private static readonly string[] ProjectMarkerFolders = [".git", ".svn", ".hg"];
+
+    /// <summary>True when the folder or any parent folder is a software project (cached per scan).</summary>
+    private bool IsInsideProject(string? directory, Dictionary<string, bool> cache)
+    {
+        if (string.IsNullOrEmpty(directory))
+        {
+            return false;
+        }
+
+        if (cache.TryGetValue(directory, out var known))
+        {
+            return known;
+        }
+
+        var isProject = ProjectMarkerFolders.Any(f => fileSystem.DirectoryExists(Path.Combine(directory, f)))
+            || fileSystem.EnumerateFiles(directory, "*", recursive: false).Any(f =>
+                ProjectMarkerFiles.Contains(Path.GetFileName(f.Path)) || ProjectMarkerExtensions.Contains(Path.GetExtension(f.Path)));
+        var result = isProject || IsInsideProject(Path.GetDirectoryName(directory), cache);
+        cache[directory] = result;
+        return result;
     }
 }

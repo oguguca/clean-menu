@@ -49,7 +49,7 @@ public class AdvancedCleanupViewModelTests
     {
         var files = new MemoryFileSystem();
         files.Add(Profile + @"\Videos\filme.mkv", Gb.Of(2), DateTimeOffset.UtcNow);
-        files.Add(Profile + @"\Downloads\instalador.exe", Gb.Of(1), DateTimeOffset.UtcNow);
+        files.Add(Profile + @"\Downloads\backup.zip", Gb.Of(1), DateTimeOffset.UtcNow);
         var (vm, _, _, _) = Create(files);
 
         await vm.ScanCommand.ExecuteAsync(null);

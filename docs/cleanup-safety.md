@@ -58,3 +58,26 @@ por operação (`CleanMenu.Elevated`).
 - `tests/CleanMenu.Infrastructure.Tests/Cleanup`: arquivos reais, mas somente numa pasta sandbox
   criada em `%TEMP%` pelo próprio teste (inclui junction, arquivo bloqueado e somente leitura).
   Os testes nunca esvaziam a Lixeira real.
+
+## Limpeza Avançada: o que nunca é oferecido
+
+Incidente (16/11/2026): o modo "Duplicados", rodando na pasta do usuário, tratou arquivos idênticos
+dentro de programas e projetos como cópias e mandou 663 arquivos para a Lixeira. Entre eles estavam
+arquivos do VS Code, do Epic, do WhatsApp, do Spotify, do Android SDK, de `node_modules` e de `.venv`.
+Os arquivos foram restaurados da Lixeira. Desde então valem estas regras (`AdvancedFileRules`,
+`AdvancedScanner`, `AdvancedProtectedFolders`):
+
+1. Pastas de programas nunca são analisadas: `AppData` inteira, Program Files, ProgramData e toda
+   pasta registrada como `InstallLocation` de um programa instalado.
+2. Pastas de ferramentas e de projetos nunca são analisadas, em qualquer profundidade:
+   - pastas ocultas (`.git`, `.venv`, `.gradle`, `.vscode`...);
+   - `node_modules`, `site-packages`, `bin`, `obj`, `build`, `dist`, `android`, `steamapps` e similares.
+3. Projetos de software são detectados por marcadores, e tudo dentro deles é ignorado:
+   - pastas: `.git`, `.svn`, `.hg`;
+   - arquivos: `package.json`, `*.sln`, `*.csproj`, `pyproject.toml`, `requirements.txt`,
+     `build.gradle`, `Cargo.toml`, `go.mod` e outros.
+4. "Duplicados" só considera conteúdo pessoal: fotos, vídeos, músicas, documentos e arquivos
+   compactados.
+5. Arquivos de programa (`.exe`, `.dll`, `.node`, `.js`, `.json`, `.wasm`, `.pak`...) nunca aparecem,
+   nem em "Arquivos grandes".
+6. As regras são conferidas de novo imediatamente antes de mandar cada arquivo para a Lixeira.

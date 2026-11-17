@@ -32,7 +32,45 @@ public static class AdvancedProtectedFolders
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-        }.Where(f => !string.IsNullOrWhiteSpace(f)).ToList();
+            // Everything programs keep per user (VS Code, Discord, Spotify, games, browsers...).
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData"),
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        }
+        .Concat(InstallLocations())
+        .Where(f => !string.IsNullOrWhiteSpace(f) && Path.IsPathFullyQualified(f))
+        .Select(Path.TrimEndingDirectorySeparator)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
+    /// <summary>Folders where installed programs live, from the Uninstall registry keys (InstallLocation).</summary>
+    private static List<string> InstallLocations()
+    {
+        var result = new List<string>();
+        foreach (var hive in new[] { Registry.LocalMachine, Registry.CurrentUser })
+        {
+            foreach (var keyPath in new[] { @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" })
+            {
+                try
+                {
+                    using var key = hive.OpenSubKey(keyPath);
+                    foreach (var name in key?.GetSubKeyNames() ?? [])
+                    {
+                        using var app = key!.OpenSubKey(name);
+                        if (app?.GetValue("InstallLocation") is string location && location.Trim().Trim('"').Length > 3)
+                        {
+                            result.Add(location.Trim().Trim('"'));
+                        }
+                    }
+                }
+                catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException)
+                {
+                }
+            }
+        }
+
+        return result;
+    }
 }
 
 /// <summary>Installed programs (Uninstall registry keys) and AppData folders. Read-only.</summary>
