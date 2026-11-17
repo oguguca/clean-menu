@@ -1,4 +1,4 @@
-﻿<Window x:Class="CleanMenu.App.MainWindow"
+<Window x:Class="CleanMenu.App.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,6 +10,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         Title="Clean Menu"
+        Icon="pack://application:,,,/CleanMenu;component/Assets/app.ico"
         Width="1280" Height="840"
         MinWidth="1040" MinHeight="660"
         WindowStartupLocation="CenterScreen"
@@ -84,10 +85,8 @@
 
         <!-- Brand -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10,0,0,12">
-          <Border Width="34" Height="34" CornerRadius="9" Background="{DynamicResource Brush.Accent}">
-            <TextBlock Text="{x:Static ui:Glyphs.CheckMark}" Style="{StaticResource Text.Icon}" FontSize="17"
-                       HorizontalAlignment="Center" Foreground="{DynamicResource Brush.OnAccent}" />
-          </Border>
+          <Image Source="pack://application:,,,/CleanMenu;component/Assets/icon.png" Width="36" Height="36"
+                 RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="Ícone do Clean Menu" />
           <TextBlock Text="Clean Menu" FontFamily="{StaticResource Font.Display}" FontSize="19" FontWeight="SemiBold"
                      VerticalAlignment="Center" Margin="12,0,0,0" />
         </StackPanel>

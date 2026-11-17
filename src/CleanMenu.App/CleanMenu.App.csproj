@@ -8,7 +8,14 @@
     <RootNamespace>CleanMenu.App</RootNamespace>
     <AssemblyName>CleanMenu</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Icon of the .exe (Explorer, taskbar, shortcuts). -->
+    <ApplicationIcon>..\..\assets\app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="..\..\assets\app.ico" Link="Assets\app.ico" />
+    <Resource Include="..\..\assets\icon.png" Link="Assets\icon.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="CleanMenu.App.Tests" />

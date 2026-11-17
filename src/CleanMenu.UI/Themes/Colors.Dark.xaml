@@ -6,6 +6,9 @@
   <SolidColorBrush x:Key="Brush.Card" Color="#0D1836" />
   <SolidColorBrush x:Key="Brush.CardHover" Color="#13214A" />
   <SolidColorBrush x:Key="Brush.Border" Color="#1C2D5C" />
+  <SolidColorBrush x:Key="Brush.Hairline" Color="#24FFFFFF" />
+  <SolidColorBrush x:Key="Brush.Fill" Color="#1A2A52" />
+  <SolidColorBrush x:Key="Brush.FillHover" Color="#22356A" />
   <SolidColorBrush x:Key="Brush.Track" Color="#1C2D5C" />
 
   <SolidColorBrush x:Key="Brush.Text" Color="#EEF3FF" />
